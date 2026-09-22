@@ -381,6 +381,7 @@
     <button id="exportBtn" class="tool-btn" type="button">⬇️ CREAR RESPALDO</button>
     <button id="importBtn" class="tool-btn" type="button">⬆️ IMPORTAR RESPALDO</button>
     <button id="clearAgendaBtn" class="tool-btn danger" type="button">🗑️ LIMPIAR AGENDA</button>
+    <button id="changeLicenseBtn" class="tool-btn" type="button">🔑 CAMBIAR LICENCIA</button>
     <input id="importFile" type="file" accept=".json,application/json">
   </div></div></section>
 </section>
@@ -444,7 +445,7 @@ const cleanText=v=>String(v??"").trim();
 const upperText=v=>cleanText(v).toLocaleUpperCase("es-CL");
 function loadProfile(){try{const p=JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");return{name:upperText(p.name)||"MI AGENDA",subtitle:upperText(p.subtitle)||"ILUMINACIÓN · DISEÑO Y PROGRAMACIÓN"}}catch{return{name:"MI AGENDA",subtitle:"ILUMINACIÓN · DISEÑO Y PROGRAMACIÓN"}}}
 function applyProfile(){const p=loadProfile();document.querySelectorAll(".brand").forEach(b=>{b.dataset.name=p.name;b.dataset.subtitle=p.subtitle});if($("profileName"))$("profileName").value=p.name;if($("profileSubtitle"))$("profileSubtitle").value=p.subtitle}
-function saveProfile(){const p={name:upperText($("profileName")?.value)||"MI AGENDA",subtitle:upperText($("profileSubtitle")?.value)||"ILUMINACIÓN · DISEÑO Y PROGRAMACIÓN"};localStorage.setItem(PROFILE_KEY,JSON.stringify(p));applyProfile();alert("Tu agenda quedó personalizada.")}
+function saveProfile(){const p={name:upperText($("profileName")?.value)||"MI AGENDA",subtitle:upperText($("profileSubtitle")?.value)||"ILUMINACIÓN · DISEÑO Y PROGRAMACIÓN"};localStorage.setItem(PROFILE_KEY,JSON.stringify(p));applyProfile();programarGuardadoNube();alert("Tu agenda quedó personalizada.")}
 
 function safeClass(v){
  return cleanText(v).toLocaleLowerCase("es-CL")
@@ -477,7 +478,7 @@ async function guardarAgendaNube(){
  if(!activeLicense||cloudSyncBusy)return false;
  cloudSyncBusy=true;
  try{
-  const datos={events:state.events};
+  const datos={events:state.events,profile:loadProfile()};
   const res=await fetch(`${SUPABASE_REST_URL}/rpc/guardar_agenda`,{method:"POST",headers:cloudHeaders(),body:JSON.stringify({p_licencia:activeLicense,p_datos:datos})});
   if(!res.ok)throw new Error("No se pudo guardar la agenda");
   return (await res.json())===true;
@@ -496,6 +497,11 @@ async function sincronizarAgendaAlActivar(licencia){
  if(remoteHasAgenda){
   state.events=sortEvents(remoteEvents);
   localStorage.setItem(STORAGE_KEY,JSON.stringify(state.events));
+  if(remoto.profile&&typeof remoto.profile==="object"){
+   const rp={name:upperText(remoto.profile.name)||"MI AGENDA",subtitle:upperText(remoto.profile.subtitle)||"ILUMINACIÓN · DISEÑO Y PROGRAMACIÓN"};
+   localStorage.setItem(PROFILE_KEY,JSON.stringify(rp));
+   applyProfile();
+  }
  }else if(state.events.length){
   await guardarAgendaNube();
  }else{
@@ -723,6 +729,29 @@ function saveForm(ev){ev.preventDefault();const date=normalizeDate($("date").val
 function exportBackup(){const blob=new Blob([JSON.stringify({app:"KICHAN AGENDA",version:3,fecha:new Date().toISOString(),events:state.events},null,2)],{type:"application/json"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="KICHAN-AGENDA-RESPALDO.json";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 function importBackup(file){if(!file)return;const r=new FileReader();r.onload=()=>{try{const p=JSON.parse(r.result),src=Array.isArray(p)?p:p.events;if(!Array.isArray(src))throw 0;const a=src.map(normalizeEvent).filter(Boolean);if(!a.length)throw 0;if(confirm(`El respaldo contiene ${a.length} prestaciones.\n\n¿Reemplazar la agenda actual?`)){state.events=sortEvents(a);saveEvents();renderAll();showView("home");alert("Respaldo importado correctamente.")}}catch{alert("No se pudo importar el respaldo.")}$("importFile").value=""};r.readAsText(file)}
 function clearAgenda(){if(confirm("¿Seguro que quieres dejar la agenda en 0?\n\nEsta acción borrará todas las prestaciones de este dispositivo.")){state.events=[];saveEvents();renderAll();showView("home")}}
+async function cambiarLicencia(){
+ if(!confirm("¿Cambiar de licencia?\n\nLa agenda actual se guardará en la nube antes de salir."))return;
+ try{
+  clearTimeout(cloudSyncTimer);
+  if(activeLicense)await guardarAgendaNube();
+ }catch(e){
+  alert("No se pudo guardar la agenda en la nube. Revisa tu conexión antes de cambiar de licencia.");
+  return;
+ }
+ activeLicense="";
+ localStorage.removeItem(LICENSE_STORAGE_KEY);
+ localStorage.removeItem(STORAGE_KEY);
+ localStorage.removeItem(PROFILE_KEY);
+ state.events=[];
+ applyProfile();
+ renderAll();
+ showView("home");
+ const input=$("licenseCode"),msg=$("licenseMsg"),gate=$("licenseGate");
+ if(input)input.value="";
+ if(msg){msg.textContent="";msg.className="license-msg"}
+ if(gate)gate.style.display="flex";
+ setTimeout(()=>input?.focus(),100);
+}
 function renderAll(){renderHome();renderCalendar();renderSummary()}
 document.querySelectorAll(".nav-btn").forEach(b=>b.onclick=()=>showView(b.dataset.view));
 $("backListBtn").onclick=()=>showView(state.listReturnView||"home");
@@ -743,7 +772,7 @@ $("amount").oninput=()=>{const d=$("amount").value.replace(/\D/g,"");$("amount")
 $("eventForm").onsubmit=saveForm;$("cancelFormBtn").onclick=()=>{state.editingId=null;showView(state.returnView||"home")};
 $("totalCard").onclick=()=>openSimpleList("all","Prestaciones");$("confirmedCard").onclick=()=>openSimpleList("confirmed","Confirmadas");$("replacementCard").onclick=()=>openSimpleList("replacement","Reemplazos");$("nextCard").onclick=()=>{const n=sortEvents(state.events.filter(e=>e.date>=todayString()))[0];if(n)openDetail(n.id,"home")};
 $("paidCard").onclick=()=>openSimpleList("paid","Pagadas");$("pendingCard").onclick=()=>openSimpleList("pending","Pendientes");
-$("exportBtn").onclick=exportBackup;$("importBtn").onclick=()=>$("importFile").click();$("importFile").onchange=()=>importBackup($("importFile").files[0]);$("clearAgendaBtn").onclick=clearAgenda;
+$("exportBtn").onclick=exportBackup;$("importBtn").onclick=()=>$("importFile").click();$("importFile").onchange=()=>importBackup($("importFile").files[0]);$("clearAgendaBtn").onclick=clearAgenda;if($("changeLicenseBtn"))$("changeLicenseBtn").onclick=cambiarLicencia;
 async function validarLicencia(codigo){
   const code=upperText(codigo);
   if(!code)return null;
