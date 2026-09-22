@@ -432,10 +432,12 @@
 const STORAGE_KEY="kichan-agenda-colegas-v1";
 const PROFILE_KEY="kichan-agenda-colegas-profile-v1";
 const LICENSE_STORAGE_KEY="kichan-agenda-colegas-license-v1";
+const DEVICE_STORAGE_KEY="kichan-agenda-colegas-device-v1";
 const SUPABASE_REST_URL="https://neespcclnniuwscpjaon.supabase.co/rest/v1";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5lZXNwY2Nsbm5pdXdzY3BqYW9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMzQ3NTgsImV4cCI6MjEwNTYxMDc1OH0.g3h2gMoLRfpgBLCTEXim84XmiQW3T7TASYCdsgwYFXs";
 
 let activeLicense="";
+let activeDeviceId="";
 let cloudSyncBusy=false;
 let cloudSyncTimer=null;
 
@@ -454,6 +456,19 @@ function safeClass(v){
   .replace(/^-+|-+$/g,"");
 }
 function makeId(){return Date.now().toString()+"-"+Math.random().toString(36).slice(2,8)}
+function getDeviceId(){
+ let id=cleanText(localStorage.getItem(DEVICE_STORAGE_KEY));
+ if(!id){
+  try{id=(crypto&&typeof crypto.randomUUID==="function")?crypto.randomUUID():"dev-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,14)}catch{id="dev-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,14)}
+  localStorage.setItem(DEVICE_STORAGE_KEY,id);
+ }
+ return id;
+}
+async function autorizarDispositivo(licencia,dispositivo){
+ const res=await fetch(`${SUPABASE_REST_URL}/rpc/activar_dispositivo`,{method:"POST",headers:cloudHeaders(),body:JSON.stringify({p_licencia:upperText(licencia),p_dispositivo_id:dispositivo})});
+ if(!res.ok)throw new Error("No se pudo autorizar el dispositivo");
+ return (await res.json())===true;
+}
 function normalizeDate(v){const t=cleanText(v);if(/^\d{4}-\d{2}-\d{2}$/.test(t))return t;const m=t.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);return m?`${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`:""}
 function numericAmount(v){if(typeof v==="number"&&Number.isFinite(v))return Math.max(0,Math.round(v));const d=String(v??"").replace(/\D/g,"");return d?Number(d):0}
 function formatMoney(v){return "$"+new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(numericAmount(v))}
@@ -470,7 +485,7 @@ function saveEvents(){
 }
 function cloudHeaders(){return {"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${SUPABASE_ANON_KEY}`}}
 async function cargarAgendaNube(licencia){
- const res=await fetch(`${SUPABASE_REST_URL}/rpc/cargar_agenda`,{method:"POST",headers:cloudHeaders(),body:JSON.stringify({p_licencia:upperText(licencia)})});
+ const res=await fetch(`${SUPABASE_REST_URL}/rpc/cargar_agenda`,{method:"POST",headers:cloudHeaders(),body:JSON.stringify({p_licencia:upperText(licencia),p_dispositivo_id:activeDeviceId||getDeviceId()})});
  if(!res.ok)throw new Error("No se pudo cargar la agenda");
  return await res.json();
 }
@@ -479,7 +494,7 @@ async function guardarAgendaNube(){
  cloudSyncBusy=true;
  try{
   const datos={events:state.events,profile:loadProfile()};
-  const res=await fetch(`${SUPABASE_REST_URL}/rpc/guardar_agenda`,{method:"POST",headers:cloudHeaders(),body:JSON.stringify({p_licencia:activeLicense,p_datos:datos})});
+  const res=await fetch(`${SUPABASE_REST_URL}/rpc/guardar_agenda`,{method:"POST",headers:cloudHeaders(),body:JSON.stringify({p_licencia:activeLicense,p_dispositivo_id:activeDeviceId||getDeviceId(),p_datos:datos})});
   if(!res.ok)throw new Error("No se pudo guardar la agenda");
   return (await res.json())===true;
  }finally{cloudSyncBusy=false}
@@ -739,6 +754,7 @@ async function cambiarLicencia(){
   return;
  }
  activeLicense="";
+ activeDeviceId="";
  localStorage.removeItem(LICENSE_STORAGE_KEY);
  localStorage.removeItem(STORAGE_KEY);
  localStorage.removeItem(PROFILE_KEY);
@@ -785,7 +801,28 @@ function abrirAgenda(){const g=$("licenseGate");if(g)g.style.display="none"}
 async function activarLicencia(codigo,automatico=false){
   const btn=$("licenseBtn"),msg=$("licenseMsg"),input=$("licenseCode");
   btn.disabled=true;msg.className="license-msg";msg.textContent="Validando…";
-  try{const r=await validarLicencia(codigo);if(r&&r.valida===true){const code=upperText(codigo);localStorage.setItem(LICENSE_STORAGE_KEY,code);msg.textContent="Cargando tu agenda…";await sincronizarAgendaAlActivar(code);msg.textContent="Licencia activa";abrirAgenda();return true}localStorage.removeItem(LICENSE_STORAGE_KEY);activeLicense="";msg.className="license-msg error";msg.textContent="Código inválido o licencia desactivada.";if(!automatico)input.focus()}catch(e){msg.className="license-msg error";msg.textContent="No se pudo conectar o sincronizar. Revisa tu conexión e inténtalo nuevamente."}finally{btn.disabled=false}return false
+  try{
+   const r=await validarLicencia(codigo);
+   if(r&&r.valida===true){
+    const code=upperText(codigo),deviceId=getDeviceId();
+    msg.textContent="Autorizando dispositivo…";
+    const autorizado=await autorizarDispositivo(code,deviceId);
+    if(!autorizado){
+     localStorage.removeItem(LICENSE_STORAGE_KEY);activeLicense="";activeDeviceId="";
+     msg.className="license-msg error";
+     msg.textContent="Esta licencia ya está vinculada a otro dispositivo.";
+     if(!automatico)input.focus();
+     return false;
+    }
+    activeDeviceId=deviceId;
+    localStorage.setItem(LICENSE_STORAGE_KEY,code);
+    msg.textContent="Cargando tu agenda…";
+    await sincronizarAgendaAlActivar(code);
+    msg.textContent="Licencia activa";abrirAgenda();return true;
+   }
+   localStorage.removeItem(LICENSE_STORAGE_KEY);activeLicense="";activeDeviceId="";msg.className="license-msg error";msg.textContent="Código inválido o licencia desactivada.";if(!automatico)input.focus();
+  }catch(e){msg.className="license-msg error";msg.textContent="No se pudo conectar o sincronizar. Revisa tu conexión e inténtalo nuevamente."}finally{btn.disabled=false}
+  return false
 }
 function iniciarLicencia(){
   const input=$("licenseCode"),btn=$("licenseBtn");
