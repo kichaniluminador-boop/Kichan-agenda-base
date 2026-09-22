@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="Kichan Agenda">
 <title>Kichan Agenda</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="apple-touch-icon" href="./agenda-icon-512.png">
-<link rel="icon" href="./agenda-icon-512.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" href="./kichan-icon-512.png">
 <style>
 :root{--bg:#050505;--card:#151515;--field:#090909;--line:#343434;--gold:#efbd37;--gold2:#b88a25;--text:#f5f5f5;--muted:#969696;--danger:#e05a5a;--green:#35c66b}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;padding:0;width:100%;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif}body{overflow-x:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{width:100%;max-width:430px;min-height:100vh;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 18px calc(125px + env(safe-area-inset-bottom))}.view{display:none}.view.active{display:block}.brand{text-align:center;color:var(--gold2);font-size:14px;font-weight:800;letter-spacing:7px;margin:12px 0 46px}.page-title{margin:0 0 30px;text-align:center;font-size:48px;line-height:.95;letter-spacing:-2px;font-weight:800}.page-subtitle{margin:-16px 0 28px;text-align:center;color:var(--muted);font-size:13px;letter-spacing:3px;font-weight:700;text-transform:uppercase}
@@ -299,9 +299,23 @@
 .next-extra-row.notes{margin-top:0;padding:10px 11px;border:1px solid #383838;border-radius:12px;background:rgba(0,0,0,.34);font-size:14px;font-weight:800}
 @media(max-width:360px){.next-contact-actions{gap:16px}.next-contact-btn{width:44px;height:44px}.next-place{font-size:18px}}
 
+
+/* Control de licencia Supabase */
+.license-gate{position:fixed;inset:0;z-index:99999;background:#050505;display:flex;align-items:center;justify-content:center;padding:24px}.license-box{width:100%;max-width:390px;text-align:center}.license-brand{color:var(--gold2);font-size:13px;font-weight:800;letter-spacing:5px;margin-bottom:28px}.license-title{font-size:38px;line-height:1;margin:0 0 12px}.license-sub{color:var(--muted);font-size:15px;line-height:1.45;margin:0 0 24px}.license-input{width:100%;background:var(--field);border:1px solid var(--line);border-radius:14px;color:var(--text);padding:16px;text-align:center;text-transform:uppercase;font-weight:800;letter-spacing:1px;outline:none}.license-input:focus{border-color:var(--gold)}.license-btn{width:100%;margin-top:12px;border:0;border-radius:14px;padding:16px;background:var(--gold);color:#111;font-weight:900}.license-btn:disabled{opacity:.55}.license-msg{min-height:22px;margin-top:14px;color:var(--muted);font-size:14px}.license-msg.error{color:var(--danger)}
 </style>
 </head>
 <body>
+<div id="licenseGate" class="license-gate">
+  <div class="license-box">
+    <div class="license-brand">AGENDA</div>
+    <h1 class="license-title">Activar Agenda</h1>
+    <p class="license-sub">Ingresa tu código de licencia para continuar.</p>
+    <input id="licenseCode" class="license-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="CÓDIGO DE LICENCIA">
+    <button id="licenseBtn" class="license-btn" type="button">ACTIVAR</button>
+    <div id="licenseMsg" class="license-msg"></div>
+  </div>
+</div>
+
 <main class="app">
 <section id="homeView" class="view active">
   <div class="brand">KICHAN ILUMINADOR</div><h1 class="page-title">Agenda</h1>
@@ -416,6 +430,10 @@
 "use strict";
 const STORAGE_KEY="kichan-agenda-colegas-v1";
 const PROFILE_KEY="kichan-agenda-colegas-profile-v1";
+const LICENSE_STORAGE_KEY="kichan-agenda-colegas-license-v1";
+const SUPABASE_REST_URL="https://neespcclnniuwscpjaon.supabase.co/rest/v1";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5lZXNwY2Nsbm5pdXdzY3BqYW9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMzQ3NTgsImV4cCI6MjEwNTYxMDc1OH0.g3h2gMoLRfpgBLCTEXim84XmiQW3T7TASYCdsgwYFXs";
+
 const state={events:[],view:"home",editingId:null,returnView:"home",selectedDate:"",calendarYear:new Date().getFullYear(),calendarMonth:new Date().getMonth(),listFilter:"",detailId:null,detailReturnView:"home"};
 const $=id=>document.getElementById(id);
 const cleanText=v=>String(v??"").trim();
@@ -679,12 +697,35 @@ $("eventForm").onsubmit=saveForm;$("cancelFormBtn").onclick=()=>{state.editingId
 $("totalCard").onclick=()=>openSimpleList("all","Prestaciones");$("confirmedCard").onclick=()=>openSimpleList("confirmed","Confirmadas");$("replacementCard").onclick=()=>openSimpleList("replacement","Reemplazos");$("nextCard").onclick=()=>{const n=sortEvents(state.events.filter(e=>e.date>=todayString()))[0];if(n)openDetail(n.id,"home")};
 $("paidCard").onclick=()=>openSimpleList("paid","Pagadas");$("pendingCard").onclick=()=>openSimpleList("pending","Pendientes");
 $("exportBtn").onclick=exportBackup;$("importBtn").onclick=()=>$("importFile").click();$("importFile").onchange=()=>importBackup($("importFile").files[0]);$("clearAgendaBtn").onclick=clearAgenda;
+async function validarLicencia(codigo){
+  const code=upperText(codigo);
+  if(!code)return null;
+  const res=await fetch(`${SUPABASE_REST_URL}/rpc/validar_licencia`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${SUPABASE_ANON_KEY}`},body:JSON.stringify({p_codigo:code})});
+  if(!res.ok)throw new Error("No se pudo validar la licencia");
+  const data=await res.json();
+  return Array.isArray(data)&&data.length?data[0]:null;
+}
+function abrirAgenda(){const g=$("licenseGate");if(g)g.style.display="none"}
+async function activarLicencia(codigo,automatico=false){
+  const btn=$("licenseBtn"),msg=$("licenseMsg"),input=$("licenseCode");
+  btn.disabled=true;msg.className="license-msg";msg.textContent="Validando…";
+  try{const r=await validarLicencia(codigo);if(r&&r.valida===true){localStorage.setItem(LICENSE_STORAGE_KEY,upperText(codigo));msg.textContent="Licencia activa";abrirAgenda();return true}localStorage.removeItem(LICENSE_STORAGE_KEY);msg.className="license-msg error";msg.textContent="Código inválido o licencia desactivada.";if(!automatico)input.focus()}catch(e){msg.className="license-msg error";msg.textContent="No se pudo conectar. Revisa tu conexión e inténtalo nuevamente."}finally{btn.disabled=false}return false
+}
+function iniciarLicencia(){
+  const input=$("licenseCode"),btn=$("licenseBtn");
+  input.addEventListener("input",()=>input.value=input.value.toLocaleUpperCase("es-CL"));
+  btn.onclick=()=>activarLicencia(input.value);
+  input.addEventListener("keydown",e=>{if(e.key==="Enter")activarLicencia(input.value)});
+  const guardada=localStorage.getItem(LICENSE_STORAGE_KEY)||"";
+  if(guardada){input.value=guardada;activarLicencia(guardada,true)}else setTimeout(()=>input.focus(),100);
+}
 applyProfile();
 if($("saveProfileBtn"))$("saveProfileBtn").addEventListener("click",saveProfile);
 state.events=loadEvents();
 renderCalendar();
 renderSummary();
 showView("home");
+iniciarLicencia();
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 </script>
 </body>
