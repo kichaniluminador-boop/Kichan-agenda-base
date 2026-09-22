@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="Kichan Agenda">
 <title>Kichan Agenda</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="icon" href="./kichan-icon-512.png">
+<link rel="apple-touch-icon" href="./agenda-icon-512.png">
+<link rel="icon" href="./agenda-icon-512.png">
 <style>
 :root{--bg:#050505;--card:#151515;--field:#090909;--line:#343434;--gold:#efbd37;--gold2:#b88a25;--text:#f5f5f5;--muted:#969696;--danger:#e05a5a;--green:#35c66b}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;padding:0;width:100%;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif}body{overflow-x:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{width:100%;max-width:430px;min-height:100vh;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 18px calc(125px + env(safe-area-inset-bottom))}.view{display:none}.view.active{display:block}.brand{text-align:center;color:var(--gold2);font-size:14px;font-weight:800;letter-spacing:7px;margin:12px 0 46px}.page-title{margin:0 0 30px;text-align:center;font-size:48px;line-height:.95;letter-spacing:-2px;font-weight:800}.page-subtitle{margin:-16px 0 28px;text-align:center;color:var(--muted);font-size:13px;letter-spacing:3px;font-weight:700;text-transform:uppercase}
@@ -434,6 +434,10 @@ const LICENSE_STORAGE_KEY="kichan-agenda-colegas-license-v1";
 const SUPABASE_REST_URL="https://neespcclnniuwscpjaon.supabase.co/rest/v1";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5lZXNwY2Nsbm5pdXdzY3BqYW9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMzQ3NTgsImV4cCI6MjEwNTYxMDc1OH0.g3h2gMoLRfpgBLCTEXim84XmiQW3T7TASYCdsgwYFXs";
 
+let activeLicense="";
+let cloudSyncBusy=false;
+let cloudSyncTimer=null;
+
 const state={events:[],view:"home",editingId:null,returnView:"home",selectedDate:"",calendarYear:new Date().getFullYear(),calendarMonth:new Date().getMonth(),listFilter:"",detailId:null,detailReturnView:"home"};
 const $=id=>document.getElementById(id);
 const cleanText=v=>String(v??"").trim();
@@ -458,7 +462,50 @@ function formatDateWithWeekday(s){const d=parseLocalDate(s);if(!d)return"";let w
 function normalizeEvent(r){if(!r||typeof r!=="object")return null;const date=normalizeDate(r.date??r.fecha),artist=cleanText(r.artist??r.artista??r.band??r.banda??r.nombre);if(!date||!artist)return null;return{id:cleanText(r.id)||makeId(),date,artist:upperText(artist),place:upperText(r.place??r.location??r.localidad??r.lugar),meeting:upperText(r.meeting??r.meetingPoint??r.puntoEncuentro??r.encuentro),departure:cleanText(r.departure??r.salida??r.horaSalida??r.arrival),test:cleanText(r.test??r.soundcheck??r.prueba??r.horaPrueba),show:cleanText(r.show??r.showtime??r.horaShow),contact:upperText(r.contact??r.contacto??r.contactName),phone:cleanText(r.phone??r.telefono??r.tel),status:cleanText(r.status??r.estado)||"Confirmado",payment:cleanText(r.payment??r.pago)||"Pendiente",amount:numericAmount(r.amount??r.monto),replacementPerson:upperText(r.replacementPerson??r.reemplaza??r.reemplazante),notes:upperText(r.notes??r.notas)}}
 function sortEvents(a){return a.slice().sort((x,y)=>x.date.localeCompare(y.date)||(x.show||x.departure||"99:99").localeCompare(y.show||y.departure||"99:99"))}
 function loadEvents(){try{const r=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");return Array.isArray(r)?sortEvents(r.map(normalizeEvent).filter(Boolean)):[]}catch{return[]}}
-function saveEvents(){state.events=sortEvents(state.events);localStorage.setItem(STORAGE_KEY,JSON.stringify(state.events))}
+function saveEvents(){
+ state.events=sortEvents(state.events);
+ localStorage.setItem(STORAGE_KEY,JSON.stringify(state.events));
+ programarGuardadoNube();
+}
+function cloudHeaders(){return {"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${SUPABASE_ANON_KEY}`}}
+async function cargarAgendaNube(licencia){
+ const res=await fetch(`${SUPABASE_REST_URL}/rpc/cargar_agenda`,{method:"POST",headers:cloudHeaders(),body:JSON.stringify({p_licencia:upperText(licencia)})});
+ if(!res.ok)throw new Error("No se pudo cargar la agenda");
+ return await res.json();
+}
+async function guardarAgendaNube(){
+ if(!activeLicense||cloudSyncBusy)return false;
+ cloudSyncBusy=true;
+ try{
+  const datos={events:state.events};
+  const res=await fetch(`${SUPABASE_REST_URL}/rpc/guardar_agenda`,{method:"POST",headers:cloudHeaders(),body:JSON.stringify({p_licencia:activeLicense,p_datos:datos})});
+  if(!res.ok)throw new Error("No se pudo guardar la agenda");
+  return (await res.json())===true;
+ }finally{cloudSyncBusy=false}
+}
+function programarGuardadoNube(){
+ if(!activeLicense)return;
+ clearTimeout(cloudSyncTimer);
+ cloudSyncTimer=setTimeout(()=>guardarAgendaNube().catch(()=>{}),450);
+}
+async function sincronizarAgendaAlActivar(licencia){
+ activeLicense=upperText(licencia);
+ const remoto=await cargarAgendaNube(activeLicense);
+ const remoteEvents=remoto&&Array.isArray(remoto.events)?remoto.events.map(normalizeEvent).filter(Boolean):[];
+ const remoteHasAgenda=remoto&&typeof remoto==="object"&&Array.isArray(remoto.events);
+ if(remoteHasAgenda){
+  state.events=sortEvents(remoteEvents);
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state.events));
+ }else if(state.events.length){
+  await guardarAgendaNube();
+ }else{
+  state.events=[];
+  localStorage.setItem(STORAGE_KEY,"[]");
+  await guardarAgendaNube();
+ }
+ renderAll();
+ showView("home");
+}
 function showView(view){state.view=view;document.querySelectorAll(".view").forEach(e=>e.classList.remove("active"));const t=$(view+"View");if(t)t.classList.add("active");document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.view===view));$("bottomNav").style.display=view==="form"?"none":"grid";if(view==="home")renderHome();if(view==="calendar")renderCalendar();if(view==="summary")renderSummary();if(view==="list")renderSimpleList();if(view==="detail")renderDetail();window.scrollTo(0,0)}
 function todayString(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function makeCompactCard(e,editable=true){
@@ -709,7 +756,7 @@ function abrirAgenda(){const g=$("licenseGate");if(g)g.style.display="none"}
 async function activarLicencia(codigo,automatico=false){
   const btn=$("licenseBtn"),msg=$("licenseMsg"),input=$("licenseCode");
   btn.disabled=true;msg.className="license-msg";msg.textContent="Validando…";
-  try{const r=await validarLicencia(codigo);if(r&&r.valida===true){localStorage.setItem(LICENSE_STORAGE_KEY,upperText(codigo));msg.textContent="Licencia activa";abrirAgenda();return true}localStorage.removeItem(LICENSE_STORAGE_KEY);msg.className="license-msg error";msg.textContent="Código inválido o licencia desactivada.";if(!automatico)input.focus()}catch(e){msg.className="license-msg error";msg.textContent="No se pudo conectar. Revisa tu conexión e inténtalo nuevamente."}finally{btn.disabled=false}return false
+  try{const r=await validarLicencia(codigo);if(r&&r.valida===true){const code=upperText(codigo);localStorage.setItem(LICENSE_STORAGE_KEY,code);msg.textContent="Cargando tu agenda…";await sincronizarAgendaAlActivar(code);msg.textContent="Licencia activa";abrirAgenda();return true}localStorage.removeItem(LICENSE_STORAGE_KEY);activeLicense="";msg.className="license-msg error";msg.textContent="Código inválido o licencia desactivada.";if(!automatico)input.focus()}catch(e){msg.className="license-msg error";msg.textContent="No se pudo conectar o sincronizar. Revisa tu conexión e inténtalo nuevamente."}finally{btn.disabled=false}return false
 }
 function iniciarLicencia(){
   const input=$("licenseCode"),btn=$("licenseBtn");
