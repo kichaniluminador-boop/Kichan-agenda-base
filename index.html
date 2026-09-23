@@ -301,7 +301,7 @@
 
 
 /* Control de licencia Supabase */
-.license-gate{position:fixed;inset:0;z-index:99999;background:#050505;display:flex;align-items:center;justify-content:center;padding:24px}.license-box{width:100%;max-width:390px;text-align:center}.license-brand{color:var(--gold2);font-size:13px;font-weight:800;letter-spacing:5px;margin-bottom:28px}.license-title{font-size:38px;line-height:1;margin:0 0 12px}.license-sub{color:var(--muted);font-size:15px;line-height:1.45;margin:0 0 24px}.license-input{width:100%;background:var(--field);border:1px solid var(--line);border-radius:14px;color:var(--text);padding:16px;text-align:center;text-transform:uppercase;font-weight:800;letter-spacing:1px;outline:none}.license-input:focus{border-color:var(--gold)}.license-btn{width:100%;margin-top:12px;border:0;border-radius:14px;padding:16px;background:var(--gold);color:#111;font-weight:900}.license-btn:disabled{opacity:.55}.license-msg{min-height:22px;margin-top:14px;color:var(--muted);font-size:14px}.license-msg.error{color:var(--danger)}
+.license-gate{position:fixed;inset:0;z-index:99999;background:#050505;display:none;align-items:center;justify-content:center;padding:24px}.license-box{width:100%;max-width:390px;text-align:center}.license-brand{color:var(--gold2);font-size:13px;font-weight:800;letter-spacing:5px;margin-bottom:28px}.license-title{font-size:38px;line-height:1;margin:0 0 12px}.license-sub{color:var(--muted);font-size:15px;line-height:1.45;margin:0 0 24px}.license-input{width:100%;background:var(--field);border:1px solid var(--line);border-radius:14px;color:var(--text);padding:16px;text-align:center;text-transform:uppercase;font-weight:800;letter-spacing:1px;outline:none}.license-input:focus{border-color:var(--gold)}.license-btn{width:100%;margin-top:12px;border:0;border-radius:14px;padding:16px;background:var(--gold);color:#111;font-weight:900}.license-btn:disabled{opacity:.55}.license-msg{min-height:22px;margin-top:14px;color:var(--muted);font-size:14px}.license-msg.error{color:var(--danger)}
 </style>
 </head>
 <body>
@@ -374,7 +374,7 @@
   <div class="brand">KICHAN ILUMINADOR</div><h1 class="page-title">Ajustes</h1>
   <section class="backup-section" style="margin-top:18px"><h2 class="backup-title">Mi Agenda</h2><div class="tools">
     <div class="field"><label for="profileName">NOMBRE / MARCA</label><input id="profileName" class="control" type="text" placeholder="MI NOMBRE"></div>
-    <div class="field"><label for="profileSubtitle">DESCRIPCIÓN</label><input id="profileSubtitle" class="control" type="text" placeholder="ILUMINACIÓN · DISEÑO Y PROGRAMACIÓN"></div>
+    <div class="field"><label for="profileSubtitle">DESCRIPCIÓN</label><input id="profileSubtitle" class="control" type="text" placeholder="DESCRIPCIÓN (OPCIONAL)"></div>
     <button id="saveProfileBtn" class="tool-btn" type="button">💾 GUARDAR MI AGENDA</button>
   </div></section>
   <section class="backup-section"><h2 class="backup-title">Respaldo de agenda</h2><div class="tools"><div class="tool-buttons">
@@ -445,9 +445,9 @@ const state={events:[],view:"home",editingId:null,returnView:"home",selectedDate
 const $=id=>document.getElementById(id);
 const cleanText=v=>String(v??"").trim();
 const upperText=v=>cleanText(v).toLocaleUpperCase("es-CL");
-function loadProfile(){try{const p=JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");return{name:upperText(p.name)||"MI AGENDA",subtitle:upperText(p.subtitle)||"ILUMINACIÓN · DISEÑO Y PROGRAMACIÓN"}}catch{return{name:"MI AGENDA",subtitle:"ILUMINACIÓN · DISEÑO Y PROGRAMACIÓN"}}}
+function loadProfile(){try{const p=JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");return{name:upperText(p.name)||"MI AGENDA",subtitle:upperText(p.subtitle)}}catch{return{name:"MI AGENDA",subtitle:""}}}
 function applyProfile(){const p=loadProfile();document.querySelectorAll(".brand").forEach(b=>{b.dataset.name=p.name;b.dataset.subtitle=p.subtitle});if($("profileName"))$("profileName").value=p.name;if($("profileSubtitle"))$("profileSubtitle").value=p.subtitle}
-function saveProfile(){const p={name:upperText($("profileName")?.value)||"MI AGENDA",subtitle:upperText($("profileSubtitle")?.value)||"ILUMINACIÓN · DISEÑO Y PROGRAMACIÓN"};localStorage.setItem(PROFILE_KEY,JSON.stringify(p));applyProfile();programarGuardadoNube();alert("Tu agenda quedó personalizada.")}
+function saveProfile(){const p={name:upperText($("profileName")?.value)||"MI AGENDA",subtitle:upperText($("profileSubtitle")?.value)};localStorage.setItem(PROFILE_KEY,JSON.stringify(p));applyProfile();programarGuardadoNube();alert("Tu agenda quedó personalizada.")}
 
 function safeClass(v){
  return cleanText(v).toLocaleLowerCase("es-CL")
@@ -513,7 +513,7 @@ async function sincronizarAgendaAlActivar(licencia){
   state.events=sortEvents(remoteEvents);
   localStorage.setItem(STORAGE_KEY,JSON.stringify(state.events));
   if(remoto.profile&&typeof remoto.profile==="object"){
-   const rp={name:upperText(remoto.profile.name)||"MI AGENDA",subtitle:upperText(remoto.profile.subtitle)||"ILUMINACIÓN · DISEÑO Y PROGRAMACIÓN"};
+   const rp={name:upperText(remoto.profile.name)||"MI AGENDA",subtitle:upperText(remoto.profile.subtitle)};
    localStorage.setItem(PROFILE_KEY,JSON.stringify(rp));
    applyProfile();
   }
@@ -811,6 +811,7 @@ async function activarLicencia(codigo,automatico=false){
      localStorage.removeItem(LICENSE_STORAGE_KEY);activeLicense="";activeDeviceId="";
      msg.className="license-msg error";
      msg.textContent="Esta licencia ya está vinculada a otro dispositivo.";
+     if($("licenseGate"))$("licenseGate").style.display="flex";
      if(!automatico)input.focus();
      return false;
     }
@@ -820,8 +821,8 @@ async function activarLicencia(codigo,automatico=false){
     await sincronizarAgendaAlActivar(code);
     msg.textContent="Licencia activa";abrirAgenda();return true;
    }
-   localStorage.removeItem(LICENSE_STORAGE_KEY);activeLicense="";activeDeviceId="";msg.className="license-msg error";msg.textContent="Código inválido o licencia desactivada.";if(!automatico)input.focus();
-  }catch(e){msg.className="license-msg error";msg.textContent="No se pudo conectar o sincronizar. Revisa tu conexión e inténtalo nuevamente."}finally{btn.disabled=false}
+   localStorage.removeItem(LICENSE_STORAGE_KEY);activeLicense="";activeDeviceId="";msg.className="license-msg error";msg.textContent="Código inválido o licencia desactivada.";if($("licenseGate"))$("licenseGate").style.display="flex";if(!automatico)input.focus();
+  }catch(e){msg.className="license-msg error";msg.textContent="No se pudo conectar o sincronizar. Revisa tu conexión e inténtalo nuevamente.";if($("licenseGate"))$("licenseGate").style.display="flex"}finally{btn.disabled=false}
   return false
 }
 function iniciarLicencia(){
@@ -830,7 +831,7 @@ function iniciarLicencia(){
   btn.onclick=()=>activarLicencia(input.value);
   input.addEventListener("keydown",e=>{if(e.key==="Enter")activarLicencia(input.value)});
   const guardada=localStorage.getItem(LICENSE_STORAGE_KEY)||"";
-  if(guardada){input.value=guardada;activarLicencia(guardada,true)}else setTimeout(()=>input.focus(),100);
+  if(guardada){input.value=guardada;activarLicencia(guardada,true)}else{if($("licenseGate"))$("licenseGate").style.display="flex";setTimeout(()=>input.focus(),100);}
 }
 applyProfile();
 if($("saveProfileBtn"))$("saveProfileBtn").addEventListener("click",saveProfile);
