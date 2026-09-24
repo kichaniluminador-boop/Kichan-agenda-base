@@ -309,6 +309,8 @@
 #settingsView .field>label{display:block;text-align:center}
 .theme-choice.active{border-color:#fff;box-shadow:0 0 0 2px #111,0 0 0 4px var(--theme-choice,#efbd37)}
 .theme-hint{text-align:center;color:var(--muted);font-size:11px;line-height:1.35;margin:10px 4px 0}
+#settingsView #profileName,#settingsView #profileSubtitle{text-align:center}
+#settingsView #saveProfileBtn{display:block;margin-left:auto;margin-right:auto;text-align:center}
 </style>
 </head>
 <body>
@@ -380,7 +382,7 @@
 <section id="settingsView" class="view">
   <div class="brand">KICHAN ILUMINADOR</div><h1 class="page-title">Ajustes</h1>
   <section class="backup-section" style="margin-top:18px"><h2 class="backup-title">Mi Agenda</h2><div class="tools">
-    <div class="field"><label for="profileName">NOMBRE / MARCA</label><input id="profileName" class="control" type="text" placeholder="MI NOMBRE"></div>
+    <div class="field"><label for="profileName">NOMBRE / MARCA</label><input id="profileName" class="control" type="text" placeholder="NOMBRE / MARCA"></div>
     <div class="field"><label for="profileSubtitle">DESCRIPCIÓN</label><input id="profileSubtitle" class="control" type="text" placeholder="DESCRIPCIÓN (OPCIONAL)"></div>
     <div class="field"><label>COLOR DE MI AGENDA</label><div id="themeChoices" class="theme-grid">
       <button class="theme-choice" type="button" data-theme="gold" style="--theme-choice:#efbd37" aria-label="Dorado"></button>
@@ -465,10 +467,10 @@ const cleanText=v=>String(v??"").trim();
 const upperText=v=>cleanText(v).toLocaleUpperCase("es-CL");
 const THEMES={gold:{gold:"#efbd37",gold2:"#b88a25"},orange:{gold:"#ff922b",gold2:"#b85f12"},red:{gold:"#ff5a5f",gold2:"#b52f35"},pink:{gold:"#ff63b8",gold2:"#b83f80"},purple:{gold:"#b07cff",gold2:"#7548aa"},blue:{gold:"#4da3ff",gold2:"#2875bd"},cyan:{gold:"#45d7ff",gold2:"#258da8"},green:{gold:"#35c66b",gold2:"#218947"},silver:{gold:"#e6e6e6",gold2:"#9b9b9b"}};
 let selectedTheme="gold";
-function loadProfile(){try{const p=JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");return{name:upperText(p.name)||"MI AGENDA",subtitle:upperText(p.subtitle),theme:THEMES[p.theme]?p.theme:"gold"}}catch{return{name:"MI AGENDA",subtitle:"",theme:"gold"}}}
+function loadProfile(){try{const p=JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");const savedName=upperText(p.name);const name=(!savedName||savedName==="MI AGENDA"||savedName==="MI NOMBRE")?"NOMBRE / MARCA":savedName;return{name,subtitle:upperText(p.subtitle),theme:THEMES[p.theme]?p.theme:"gold"}}catch{return{name:"NOMBRE / MARCA",subtitle:"",theme:"gold"}}}
 function applyTheme(theme){const t=THEMES[theme]||THEMES.gold;selectedTheme=THEMES[theme]?theme:"gold";document.documentElement.style.setProperty("--gold",t.gold);document.documentElement.style.setProperty("--gold2",t.gold2);document.querySelectorAll(".theme-choice").forEach(b=>b.classList.toggle("active",b.dataset.theme===selectedTheme))}
 function applyProfile(){const p=loadProfile();document.querySelectorAll(".brand").forEach(b=>{b.dataset.name=p.name;b.dataset.subtitle=p.subtitle});if($("profileName"))$("profileName").value=p.name;if($("profileSubtitle"))$("profileSubtitle").value=p.subtitle;applyTheme(p.theme)}
-function saveProfile(){const p={name:upperText($("profileName")?.value)||"MI AGENDA",subtitle:upperText($("profileSubtitle")?.value),theme:selectedTheme};localStorage.setItem(PROFILE_KEY,JSON.stringify(p));applyProfile();programarGuardadoNube();alert("Tu agenda quedó personalizada.")}
+function saveProfile(){const p={name:upperText($("profileName")?.value)||"NOMBRE / MARCA",subtitle:upperText($("profileSubtitle")?.value),theme:selectedTheme};localStorage.setItem(PROFILE_KEY,JSON.stringify(p));applyProfile();programarGuardadoNube();alert("Tu agenda quedó personalizada.")}
 
 function safeClass(v){
  return cleanText(v).toLocaleLowerCase("es-CL")
