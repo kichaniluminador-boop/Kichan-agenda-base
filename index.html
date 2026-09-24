@@ -2117,3 +2117,48 @@ body.license-authorized #bottomNav{visibility:visible;}
   if(save)save.onclick=(ev)=>window.saveForm(ev);
 })();
 </script>
+
+<style id="v58-calendar-actions-share">
+/* V58 — Calendario: Eliminar · Editar · Compartir, con iconos del diseño actual */
+#selectedDateEvents .compact-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin-top:12px!important}
+#selectedDateEvents .compact-action-group.edit-delete-group{display:contents!important}
+#selectedDateEvents .compact-action{width:100%!important;min-width:0!important;min-height:42px!important;padding:7px 4px!important;font-size:9px!important;justify-content:center!important;align-items:center!important}
+#selectedDateEvents .delete-btn{order:1;color:#ff5d5d!important;border-color:#7d3030!important}
+#selectedDateEvents .edit-btn{order:2}
+#selectedDateEvents .calendar-share-btn{order:3;color:var(--gold)!important}
+#selectedDateEvents .compact-action .cal-action-icon{width:17px;height:17px;margin-right:3px}
+</style>
+<script id="v58-calendar-actions-share-script">
+(function(){
+ const shareIcon='<span class="cal-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M5 13v7h14v-7"/></svg></span>';
+ const oldMake=window.makeCompactCard;
+ if(typeof oldMake==='function') window.makeCompactCard=function(e,editable=true){
+   const card=oldMake.apply(this,arguments);
+   if(state.view==='calendar' && editable){
+     const actions=card.querySelector('.compact-actions');
+     const group=card.querySelector('.edit-delete-group');
+     const del=card.querySelector('.delete-btn');
+     const edit=card.querySelector('.edit-btn');
+     if(actions && group){
+       if(del) group.insertBefore(del,group.firstChild);
+       const share=document.createElement('button');
+       share.type='button';share.className='compact-action calendar-share-btn';
+       share.innerHTML=shareIcon+' COMPARTIR';
+       share.onclick=ev=>{ev.preventDefault();ev.stopPropagation();shareEventV18(e)};
+       actions.appendChild(share);
+     }
+   }
+   return card;
+ };
+ const oldSelected=window.renderSelectedDate;
+ if(typeof oldSelected==='function') window.renderSelectedDate=function(){
+   const r=oldSelected.apply(this,arguments);
+   /* En fechas pasadas no mostramos “Dejar en anterior”. */
+   if(state.selectedDate && state.selectedDate<todayString()){
+     document.querySelectorAll('#selectedDateEvents .set-next-v50').forEach(b=>b.remove());
+   }
+   return r;
+ };
+ if(state.view==='calendar')renderCalendar();
+})();
+</script>
