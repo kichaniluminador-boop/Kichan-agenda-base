@@ -1410,3 +1410,20 @@ renderAll();
  if(state.view==='detail')renderDetail();
 })();
 </script>
+<style id="detail-locality-icon-v49">
+/* Subtarjeta: mismo icono de localidad aprobado en PRÓXIMO */
+#detailView .detail-locality-pin{position:relative!important;width:21px!important;height:27px!important;display:inline-block!important;flex:0 0 21px!important;font-size:0!important;margin-top:1px!important}
+#detailView .detail-locality-pin:before{content:"";position:absolute;left:2px;top:0;width:18px;height:18px;background:#ff2438;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 0 5px rgba(255,36,56,.28)}
+#detailView .detail-locality-pin:after{content:"";position:absolute;left:8px;top:6px;width:5px;height:5px;background:#071018;border-radius:50%}
+</style>
+<script id="detail-locality-icon-v49-js">
+(function(){
+ const prev=renderDetail;
+ renderDetail=function(){
+   prev();
+   const first=document.querySelector('#detailContent .detail-location-pair .detail-location-cell:first-child .detail-location-icon');
+   if(first){ first.textContent=''; first.classList.add('detail-locality-pin'); }
+ };
+ if(state.view==='detail')renderDetail();
+})();
+</script>
