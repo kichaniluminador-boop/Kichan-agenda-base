@@ -32,6 +32,9 @@
 @media(max-width:360px){.app{padding-left:12px;padding-right:12px}.page-title{font-size:42px}.form-card{padding-left:12px;padding-right:12px}.meeting-row{grid-template-columns:minmax(0,1.35fr) minmax(0,.75fr);gap:7px}.time-row,.status-row{gap:7px}.control{padding-left:10px;padding-right:10px;font-size:15px}}
 
 /* V56: MI DIRECTORIO — base de datos personal */
+.directory-launch-v57{width:100%;display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:11px;padding:13px 14px;border:1px solid var(--line);border-radius:16px;background:#171717;color:#fff;text-align:left}.directory-launch-icon-v57{font-size:22px;text-align:center}.directory-launch-v57 b{display:block;font-size:13px;color:var(--gold);letter-spacing:.4px}.directory-launch-v57 small{display:block;margin-top:3px;color:var(--muted);font-size:10px}.directory-launch-arrow-v57{font-size:24px;color:var(--gold)}
+#directoryView .directory-grid-v56{margin-top:14px}
+#directoryView .directory-note-v56{margin-top:10px}
 .directory-grid-v56{display:grid;gap:14px}.directory-box-v56{padding:14px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025)}.directory-box-v56 h3{margin:0 0 11px;text-align:center;color:var(--gold);font-size:14px;letter-spacing:.5px}.directory-fields-v56{display:grid;gap:8px}.directory-list-v56{display:grid;gap:7px;margin-top:12px}.directory-item-v56{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 11px;border:1px solid #333;border-radius:13px;background:#171717}.directory-item-v56 b{display:block;font-size:12px}.directory-item-v56 small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.directory-delete-v56{border:0;background:transparent;color:#ff8585;font-size:18px;padding:6px}.directory-empty-v56{text-align:center;color:var(--muted);font-size:11px;padding:8px}.directory-add-v56{min-height:44px!important}.directory-note-v56{text-align:center;color:var(--muted);font-size:11px;line-height:1.4;margin:0 4px 13px}
 
 /* AJUSTES V10 */
@@ -658,11 +661,7 @@ body:has(#actionSheet.show){overflow:hidden!important}
     <button id="saveProfileBtn" class="tool-btn" type="button">💾 GUARDAR AJUSTES</button>
   </div></section>
   <section class="backup-section"><h2 class="backup-title">Mi Directorio</h2><div class="tools">
-    <div class="directory-note-v56">Guarda tus bandas, productoras y recintos habituales. Aparecerán como sugerencias al crear una prestación.</div>
-    <div class="directory-grid-v56">
-      <div class="directory-box-v56"><h3>🎤 BANDAS / ARTISTAS / PRODUCTORAS</h3><div class="directory-fields-v56"><input id="directoryArtistName" class="control" type="text" placeholder="NOMBRE" autocomplete="off"><button id="directoryArtistAdd" class="tool-btn directory-add-v56" type="button">＋ AGREGAR</button></div><div id="directoryArtistList" class="directory-list-v56"></div></div>
-      <div class="directory-box-v56"><h3>📍 RECINTOS · TEATROS · BARES</h3><div class="directory-fields-v56"><input id="directoryPlaceName" class="control" type="text" placeholder="NOMBRE DEL RECINTO" autocomplete="off"><input id="directoryPlaceAddress" class="control" type="text" placeholder="DIRECCIÓN" autocomplete="off"><button id="directoryPlaceAdd" class="tool-btn directory-add-v56" type="button">＋ AGREGAR</button></div><div id="directoryPlaceList" class="directory-list-v56"></div></div>
-    </div>
+    <button id="openDirectoryBtn" class="directory-launch-v57" type="button"><span class="directory-launch-icon-v57">📒</span><span><b>MI DIRECTORIO</b><small>BANDAS · PRODUCTORAS · RECINTOS</small></span><span class="directory-launch-arrow-v57">›</span></button>
   </div></section>
   <section class="backup-section"><h2 class="backup-title">Respaldo de agenda</h2><div class="tools"><div class="tool-buttons">
     <button id="exportBtn" class="tool-btn" type="button">⬇️ CREAR RESPALDO</button>
@@ -671,6 +670,15 @@ body:has(#actionSheet.show){overflow:hidden!important}
     <button id="changeLicenseBtn" class="tool-btn" type="button">🔑 CAMBIAR LICENCIA</button>
     <input id="importFile" type="file" accept=".json,application/json">
   </div></div></section>
+</section>
+<section id="directoryView" class="view">
+  <div class="brand">KICHAN ILUMINADOR</div><h1 class="page-title">Mi Directorio</h1>
+  <button id="directoryBackBtn" class="detail-back" type="button">← VOLVER</button>
+  <div class="directory-note-v56">Guarda tus bandas, productoras y recintos habituales. Aparecerán como sugerencias al crear una prestación.</div>
+  <div class="directory-grid-v56">
+    <div class="directory-box-v56"><h3>🎤 BANDAS / ARTISTAS / PRODUCTORAS</h3><div class="directory-fields-v56"><input id="directoryArtistName" class="control" type="text" placeholder="NOMBRE" autocomplete="off"><button id="directoryArtistAdd" class="tool-btn directory-add-v56" type="button">＋ AGREGAR</button></div><div id="directoryArtistList" class="directory-list-v56"></div></div>
+    <div class="directory-box-v56"><h3>📍 RECINTOS · TEATROS · BARES</h3><div class="directory-fields-v56"><input id="directoryPlaceName" class="control" type="text" placeholder="NOMBRE DEL RECINTO" autocomplete="off"><input id="directoryPlaceAddress" class="control" type="text" placeholder="DIRECCIÓN" autocomplete="off"><button id="directoryPlaceAdd" class="tool-btn directory-add-v56" type="button">＋ AGREGAR</button></div><div id="directoryPlaceList" class="directory-list-v56"></div></div>
+  </div>
 </section>
 <section id="listView" class="view">
   <div class="brand">KICHAN ILUMINADOR</div><h1 id="listTitle" class="page-title">Lista</h1>
@@ -834,7 +842,7 @@ async function sincronizarAgendaAlActivar(licencia){
  renderAll();
  showView("home");
 }
-function showView(view){closeActionSheet();state.view=view;document.querySelectorAll(".view").forEach(e=>e.classList.remove("active"));const t=$(view+"View");if(t)t.classList.add("active");document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.view===view));$("bottomNav").style.display=view==="form"?"none":"grid";if(view==="home")renderHome();if(view==="calendar")renderCalendar();if(view==="summary")renderSummary();if(view==="list")renderSimpleList();if(view==="detail")renderDetail();window.scrollTo(0,0)}
+function showView(view){closeActionSheet();state.view=view;document.querySelectorAll(".view").forEach(e=>e.classList.remove("active"));const t=$(view+"View");if(t)t.classList.add("active");document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.view===view));$("bottomNav").style.display=(view==="form"||view==="directory")?"none":"grid";if(view==="home")renderHome();if(view==="calendar")renderCalendar();if(view==="summary")renderSummary();if(view==="directory")renderDirectory();if(view==="list")renderSimpleList();if(view==="detail")renderDetail();window.scrollTo(0,0)}
 function todayString(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 // Feriados nacionales regulares de Chile, calculados para cada año visible.
 function isoLocal(y,m,d){return `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`}
@@ -1196,6 +1204,8 @@ async function cambiarLicencia(){
 }
 function renderAll(){renderHome();renderCalendar();renderSummary()}
 document.querySelectorAll(".nav-btn").forEach(b=>b.onclick=()=>showView(b.dataset.view));
+if($("openDirectoryBtn"))$("openDirectoryBtn").onclick=()=>showView("directory");
+if($("directoryBackBtn"))$("directoryBackBtn").onclick=()=>showView("settings");
 $("backListBtn").onclick=()=>showView(state.listReturnView||"home");
 $("detailBackBtn").onclick=()=>showView(state.detailReturnView||"home");
 $("selectedAddBtn").onclick=()=>openNewForm(state.selectedDate,"calendar");
