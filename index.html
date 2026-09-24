@@ -528,7 +528,7 @@ body:has(#actionSheet.show){overflow:hidden!important}
   <section class="calendar-month-list"><div id="calendarMonthListTitle" class="calendar-month-list-title"></div><div id="calendarMonthEvents"></div></section>
 </section>
 <section id="summaryView" class="view">
-  <div class="brand">KICHAN ILUMINADOR</div><h1 class="page-title">Resumen</h1>
+  <div class="brand">KICHAN ILUMINADOR</div><h1 class="page-title">Finanzas</h1>
   <div class="summary-grid">
     <div id="paidCard" class="summary-card clickable"><div id="sumPaid" class="summary-number">0</div><div class="summary-label">Pagadas</div><div class="summary-hint">VER LISTA</div></div>
     <div id="pendingCard" class="summary-card clickable"><div id="sumPending" class="summary-number">0</div><div class="summary-label">Pendientes</div><div class="summary-hint">VER LISTA</div></div>
@@ -601,10 +601,10 @@ body:has(#actionSheet.show){overflow:hidden!important}
 </div>
 
 <nav id="bottomNav" class="bottom-nav">
-<button class="nav-btn active" data-view="home" type="button"><span>⌂</span>Inicio</button>
-<button class="nav-btn" data-view="calendar" type="button"><span>▣</span>Calendario</button>
-<button class="nav-btn" data-view="summary" type="button"><span>☰</span>Resumen</button>
-<button class="nav-btn" data-view="settings" type="button"><span>⚙</span>Ajustes</button>
+<button class="nav-btn active" data-view="home" type="button"><span>🏠</span>Inicio</button>
+<button class="nav-btn" data-view="calendar" type="button"><span>📅</span>Calendario</button>
+<button class="nav-btn" data-view="summary" type="button"><span>💰</span>Finanzas</button>
+<button class="nav-btn" data-view="settings" type="button"><span>⚙️</span>Ajustes</button>
 </nav>
 <script>
 "use strict";
@@ -1646,4 +1646,20 @@ renderAll();
   letter-spacing:.15px!important;
   opacity:.86!important;
 }
+</style>
+<style id="v58-bottom-nav-icons">
+/* V58 — iconos inferiores con presencia equivalente al engranaje, respetando cada icono */
+#bottomNav .nav-btn span{
+  font-size:25px!important;
+  line-height:1!important;
+  height:27px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  margin:0 auto 3px!important;
+}
+#bottomNav .nav-btn:nth-child(1) span{font-size:27px!important;} /* Inicio */
+#bottomNav .nav-btn:nth-child(2) span{font-size:25px!important;} /* Calendario */
+#bottomNav .nav-btn:nth-child(3) span{font-size:25px!important;} /* Finanzas */
+#bottomNav .nav-btn:nth-child(4) span{font-size:25px!important;} /* Ajustes */
 </style>
