@@ -1987,3 +1987,77 @@ renderAll();
   stroke:currentColor!important;
 }
 </style>
+
+<!-- V55 · BLOQUEO ESTRICTO DE LICENCIA — no modifica el diseño de la agenda -->
+<style id="v55-strict-license-gate">
+/* La activación siempre cubre toda la pantalla. Una regla antigua convertía
+   .license-gate en position:relative y dejaba la agenda accesible debajo. */
+#licenseGate.license-gate{
+  position:fixed!important;
+  inset:0!important;
+  z-index:2147483647!important;
+  width:100%!important;
+  min-height:100dvh!important;
+  overflow:auto!important;
+}
+/* Hasta que Supabase confirme la licencia, la app real no existe para el usuario. */
+body:not(.license-authorized) main.app,
+body:not(.license-authorized) #bottomNav{
+  visibility:hidden!important;
+  pointer-events:none!important;
+  user-select:none!important;
+}
+body:not(.license-authorized){overflow:hidden!important;}
+body.license-authorized main.app,
+body.license-authorized #bottomNav{visibility:visible;}
+</style>
+<script id="v55-strict-license-gate-js">
+(()=>{
+  const gate=()=>document.getElementById('licenseGate');
+  const lock=()=>{
+    document.body.classList.remove('license-authorized');
+    const g=gate(); if(g) g.style.display='flex';
+  };
+  const unlock=()=>{
+    /* activeLicense solo se establece después de validar + autorizar el dispositivo
+       y sincronizar correctamente. */
+    if(!window.activeLicense && typeof activeLicense!=='undefined' && !activeLicense){ lock(); return false; }
+    document.body.classList.add('license-authorized');
+    const g=gate(); if(g) g.style.display='none';
+    document.body.style.overflow='';
+    return true;
+  };
+
+  /* Cerrado por defecto incluso durante la validación automática. */
+  lock();
+
+  /* Endurece la función existente que abre la agenda. */
+  window.abrirAgenda=unlock;
+
+  /* Si se intenta abrir/guardar una prestación sin licencia, se vuelve al gate. */
+  const oldOpenNew=window.openNewForm;
+  if(typeof oldOpenNew==='function') window.openNewForm=function(){
+    if(!document.body.classList.contains('license-authorized')){lock();return;}
+    return oldOpenNew.apply(this,arguments);
+  };
+  const oldOpenEdit=window.openEditForm;
+  if(typeof oldOpenEdit==='function') window.openEditForm=function(){
+    if(!document.body.classList.contains('license-authorized')){lock();return;}
+    return oldOpenEdit.apply(this,arguments);
+  };
+  const oldSave=window.saveForm;
+  if(typeof oldSave==='function') window.saveForm=function(ev){
+    if(!document.body.classList.contains('license-authorized')){
+      if(ev&&ev.preventDefault)ev.preventDefault(); lock(); return false;
+    }
+    return oldSave.apply(this,arguments);
+  };
+
+  /* Los handlers del formulario fueron enlazados antes de este parche; los
+     sustituimos por la versión protegida sin cambiar su funcionamiento normal. */
+  const form=document.getElementById('eventForm');
+  const save=document.getElementById('saveFormBtn');
+  if(form)form.onsubmit=(ev)=>window.saveForm(ev);
+  if(save)save.onclick=(ev)=>window.saveForm(ev);
+})();
+</script>
