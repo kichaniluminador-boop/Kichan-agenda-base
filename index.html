@@ -1607,3 +1607,43 @@ renderAll();
   opacity:.62!important;
 }
 </style>
+
+<style id="v56-section-brand-hierarchy">
+/* V56 — misma jerarquía aprobada de Inicio para Calendario, Resumen y Subtarjeta.
+   Inicio queda intacto. */
+#calendarView .brand,#summaryView .brand,#detailView .brand{
+  margin:4px 0 17px!important;
+  line-height:1!important;
+}
+#calendarView .brand:before,#summaryView .brand:before,#detailView .brand:before{
+  font-size:34px!important;
+  line-height:1!important;
+  letter-spacing:6.5px!important;
+  font-weight:950!important;
+  text-shadow:0 0 10px rgba(var(--stage-rgb),.58),0 2px 2px rgba(0,0,0,.7)!important;
+}
+#calendarView .brand:after,#summaryView .brand:after,#detailView .brand:after{
+  margin-top:7px!important;
+  font-size:12.5px!important;
+  line-height:1.08!important;
+  letter-spacing:2.4px!important;
+  font-weight:900!important;
+  text-shadow:0 0 8px rgba(var(--stage-rgb),.48),0 1px 2px rgba(0,0,0,.85)!important;
+}
+/* Calendario / Resumen pasan a ser títulos secundarios, como Agenda. */
+#calendarView .page-title,#summaryView .page-title{
+  margin:7px auto 22px!important;
+  font-size:22px!important;
+  line-height:1!important;
+  letter-spacing:-.35px!important;
+  font-weight:800!important;
+}
+/* Subtarjeta: la marca respira más y VOLVER pierde protagonismo. */
+#detailView .detail-back{
+  margin:4px 0 20px!important;
+  padding:3px 0!important;
+  font-size:13px!important;
+  letter-spacing:.15px!important;
+  opacity:.86!important;
+}
+</style>
