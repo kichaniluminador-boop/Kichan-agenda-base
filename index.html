@@ -356,7 +356,7 @@
 #calendarView .day.today.has-event{border:1px solid #fff!important;outline:none!important;box-shadow:none!important}
 #selectedDateEvents .compact-date{padding-right:50px}
 .calendar-priority{position:absolute;right:13px;top:13px;z-index:4}
-.calendar-drag-handle{width:34px;height:30px;border:0;background:transparent;color:var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.calendar-drag-handle{width:40px;height:36px;border:0;background:transparent;color:var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
 .calendar-drag-handle span{display:block;width:19px;height:2px;border-radius:2px;background:currentColor}
 .calendar-drag-handle:active{cursor:grabbing}
 #selectedDateEvents .compact-card.dragging{opacity:.72;transform:scale(.985);border-color:var(--gold);z-index:10}
@@ -844,16 +844,48 @@ function saveCalendarDomOrder(){
  saveEvents();renderCalendar();
 }
 function attachCalendarDrag(card,handle){
- let active=false,startY=0;
- const move=ev=>{
-  if(!active)return;ev.preventDefault();
-  const y=ev.clientY,box=$("selectedDateEvents"),others=[...box.querySelectorAll(".compact-card[data-event-id]:not(.dragging)")];
-  let before=null;for(const el of others){const r=el.getBoundingClientRect();if(y<r.top+r.height/2){before=el;break}}
+ let active=false,pointerId=null;
+ const box=$("selectedDateEvents");
+ const reorderAt=y=>{
+  if(!active)return;
+  const others=[...box.querySelectorAll(".compact-card[data-event-id]:not(.dragging)")];
+  let before=null;
+  for(const el of others){const r=el.getBoundingClientRect();if(y<r.top+r.height/2){before=el;break}}
   if(before)box.insertBefore(card,before);else box.appendChild(card);
  };
- const end=ev=>{if(!active)return;active=false;card.classList.remove("dragging");try{handle.releasePointerCapture(ev.pointerId)}catch{};saveCalendarDomOrder()};
- handle.addEventListener("pointerdown",ev=>{active=true;startY=ev.clientY;card.classList.add("dragging");try{handle.setPointerCapture(ev.pointerId)}catch{};ev.preventDefault()});
- handle.addEventListener("pointermove",move,{passive:false});handle.addEventListener("pointerup",end);handle.addEventListener("pointercancel",end);
+ const begin=(id,y)=>{
+  active=true;pointerId=id;card.classList.add("dragging");
+  document.body.style.userSelect="none";document.body.style.webkitUserSelect="none";
+  reorderAt(y);
+ };
+ const finish=()=>{
+  if(!active)return;
+  active=false;pointerId=null;card.classList.remove("dragging");
+  document.body.style.userSelect="";document.body.style.webkitUserSelect="";
+  saveCalendarDomOrder();
+ };
+ // Pointer Events: funciona en Safari moderno y escritorio.
+ handle.addEventListener("pointerdown",ev=>{
+  if(ev.pointerType==="touch")return; // en iPhone usamos Touch Events abajo
+  ev.preventDefault();begin(ev.pointerId,ev.clientY);
+  try{handle.setPointerCapture(ev.pointerId)}catch{}
+ });
+ handle.addEventListener("pointermove",ev=>{if(!active||pointerId!==ev.pointerId)return;ev.preventDefault();reorderAt(ev.clientY)},{passive:false});
+ handle.addEventListener("pointerup",ev=>{if(pointerId===ev.pointerId)finish()});
+ handle.addEventListener("pointercancel",ev=>{if(pointerId===ev.pointerId)finish()});
+ // iPhone/iOS: seguimiento táctil directo para evitar que Safari seleccione la tarjeta.
+ handle.addEventListener("touchstart",ev=>{
+  if(!ev.touches.length)return;ev.preventDefault();
+  const t=ev.touches[0];begin(t.identifier,t.clientY);
+ },{passive:false});
+ handle.addEventListener("touchmove",ev=>{
+  if(!active)return;ev.preventDefault();
+  const t=[...ev.touches].find(x=>x.identifier===pointerId)||ev.touches[0];if(t)reorderAt(t.clientY);
+ },{passive:false});
+ handle.addEventListener("touchend",ev=>{if(active){ev.preventDefault();finish()}},{passive:false});
+ handle.addEventListener("touchcancel",finish,{passive:false});
+ handle.addEventListener("contextmenu",ev=>ev.preventDefault());
+ handle.addEventListener("selectstart",ev=>ev.preventDefault());
 }
 function renderSelectedDate(){
  const t=$("selectedDateTitle"),c=$("selectedDateEvents");c.innerHTML="";const add=$("selectedAddBtn");
