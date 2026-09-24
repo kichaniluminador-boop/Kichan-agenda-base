@@ -481,9 +481,9 @@ body:has(#actionSheet.show){overflow:hidden!important}
       </div>
       <div id="nextHeroRoutes" class="next-routes-v39"></div>
       <div class="next-times">
-        <div class="next-time"><strong id="nextHeroDeparture">—</strong>🚌 Salida</div>
-        <div class="next-time"><strong id="nextHeroTest">—</strong>🎚️ Prueba de sonido</div>
-        <div class="next-time"><strong id="nextHeroShow">—</strong>🎤 Show</div>
+        <div class="next-time"><div class="next-time-label"><span class="time-ico">🚌</span> SALIDA</div><strong id="nextHeroDeparture">—</strong></div>
+        <div class="next-time"><div class="next-time-label"><span class="time-ico">🎚️</span> PRUEBA DE SONIDO</div><strong id="nextHeroTest">—</strong></div>
+        <div class="next-time"><div class="next-time-label"><span class="time-ico">🎤</span> SHOW</div><strong id="nextHeroShow">—</strong></div>
       </div>
       <div id="nextHeroExtra" class="next-extra"></div>
     </article>
@@ -1124,8 +1124,8 @@ function renderNextHero(){
  const statusClass=n.status==="Confirmado"?"confirmado":n.status==="Va Remplazo"?"reemplazo":n.status==="Cancelado"?"cancelado":"pendiente";
  $("nextHeroStatus").textContent=statusLabel;$("nextHeroStatus").className="next-status "+statusClass;
  const routes=[];
- if(n.place)routes.push(`<div class="next-route-row"><span class="next-route-icon">📍</span><span class="next-route-name">${n.place}</span><button class="next-route-link next-place-map-v37" type="button">➤ Cómo llegar</button></div>`);
- if(n.meeting)routes.push(`<div class="next-route-row"><span class="next-route-icon">📌</span><span class="next-route-name">${n.meeting}</span><button class="next-route-link next-meeting-map-v37" type="button">➤ Cómo llegar</button></div>`);
+ if(n.place)routes.push(`<div class="next-route-row"><span class="next-route-icon next-locality-pin" aria-hidden="true"></span><span class="next-route-name">${n.place}</span><button class="next-route-link next-place-map-v37" type="button"><span class="route-arrow">➤</span> Cómo llegar</button></div>`);
+ if(n.meeting)routes.push(`<div class="next-route-row"><span class="next-route-icon next-meeting-pin">📌</span><span class="next-route-name">${n.meeting}</span><button class="next-route-link next-meeting-map-v37" type="button"><span class="route-arrow">➤</span> Cómo llegar</button></div>`);
  $("nextHeroRoutes").innerHTML=routes.join("");
  const x=[];
  if(n.status==="Va Remplazo"&&n.replacementPerson)x.push(`<div class="next-extra-row"><span class="ico">👤</span><span>REEMPLAZA: ${n.replacementPerson}</span></div>`);
@@ -1189,6 +1189,28 @@ renderDetail=function(){renderDetailV35();const e=state.events.find(x=>String(x.
 #homeView .next-status.por-confirmar{color:#efbd37!important}
 #homeView .next-status.va-remplazo{color:#62a9ff!important}
 #homeView .next-status.cancelado{color:#ff6b6b!important}
+</style>
+
+<style id="next-card-photo-match-v41">
+/* PRÓXIMO: proporciones e iconos según la última referencia aprobada */
+#homeView .next-main{grid-template-columns:76px minmax(0,1fr) 46px!important;gap:10px!important}
+#homeView .next-artist{font-size:25px!important;letter-spacing:-.4px!important}
+#homeView .next-place{font-size:14px!important;margin-top:1px!important}
+#homeView .next-routes-v39{padding:9px 0 10px!important}
+#homeView .next-route-row{grid-template-columns:28px minmax(0,1fr) auto!important;gap:8px!important;padding:6px 1px!important}
+#homeView .next-route-name{font-size:12.5px!important;font-weight:900!important}
+#homeView .next-route-link{font-size:12px!important;white-space:nowrap!important}
+#homeView .route-arrow{font-size:18px!important;vertical-align:-1px!important}
+#homeView .next-locality-pin{position:relative!important;width:20px!important;height:25px!important;display:inline-block!important;font-size:0!important}
+#homeView .next-locality-pin:before{content:"";position:absolute;left:2px;top:0;width:17px;height:17px;background:#ff2438;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 0 5px rgba(255,36,56,.28)}
+#homeView .next-locality-pin:after{content:"";position:absolute;left:8px;top:6px;width:5px;height:5px;background:#071018;border-radius:50%}
+#homeView .next-meeting-pin{font-size:24px!important;line-height:1!important}
+#homeView .next-times{padding:11px 0 10px!important}
+#homeView .next-time{display:flex!important;flex-direction:column!important;justify-content:flex-start!important;align-items:center!important;min-height:67px!important;padding:1px 6px!important}
+#homeView .next-time-label{display:flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;min-height:27px!important;font-size:10px!important;font-weight:900!important;line-height:1.05!important;color:#eef3f7!important;white-space:nowrap!important}
+#homeView .next-time-label .time-ico{font-size:18px!important;line-height:1!important}
+#homeView .next-time strong{order:2!important;font-size:18px!important;line-height:1.05!important;margin:4px 0 0!important;color:#fff!important}
+#homeView .next-contact-name-v37 .person{font-size:25px!important}
 </style>
 </body>
 </html>
