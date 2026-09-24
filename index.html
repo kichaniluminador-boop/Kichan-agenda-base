@@ -1353,3 +1353,60 @@ renderAll();
   padding-top:5px!important;
 }
 </style>
+
+<style id="detail-card-approved-style-v48">
+/* SUBTARJETA v48 — mismo lenguaje visual de PRÓXIMO, sin alterar Inicio */
+#detailView{padding-bottom:18px!important}
+#detailView .detail-card{padding:14px 14px 13px!important;border-radius:24px!important}
+#detailView .detail-head{margin-bottom:5px!important;align-items:flex-start!important}
+#detailView .detail-head-copy{flex:1!important;min-width:0!important;text-align:center!important}
+#detailView .detail-date{text-align:left!important;font-size:13px!important;margin-bottom:3px!important}
+#detailView .detail-title{font-size:25px!important;line-height:1!important;margin:3px 0 2px!important;text-align:center!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#detailView .detail-subplace{font-size:18px!important;line-height:1.05!important;margin:5px 0 10px!important;text-align:center!important;font-weight:900!important}
+#detailView .detail-status{font-size:10px!important;padding:6px 10px!important}
+#detailView .detail-times{padding:9px 0!important;gap:0!important}
+#detailView .detail-time{min-width:0!important;padding:0 7px!important;font-size:10px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important}
+#detailView .detail-time+ .detail-time{border-left:1px solid #555!important}
+#detailView .detail-time-label{display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;font-size:10px;font-weight:850;color:#ddd}
+#detailView .detail-time-label svg{width:18px;height:18px;flex:0 0 auto}
+#detailView .detail-time strong{font-size:18px!important;margin-top:4px!important;line-height:1.05!important}
+#detailView .detail-location-pair{margin-top:8px!important}
+#detailView .detail-location-cell{padding:10px 8px!important;align-items:flex-start!important;gap:8px!important}
+#detailView .detail-location-copy{min-width:0;display:block}
+#detailView .detail-location-copy b{display:block;font-size:12px;line-height:1.15;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#detailView .detail-location-copy small{display:block;margin-top:3px;font-size:9px;line-height:1.15;color:#bfc4ca;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#detailView .detail-location-icon{font-size:21px!important;margin-top:1px}
+#detailView .detail-contact-row{grid-template-columns:minmax(0,1fr) 44px 44px!important;gap:7px!important;padding:9px 4px!important}
+#detailView .detail-contact-name{font-size:13px!important}
+#detailView .detail-contact-icon{font-size:23px!important}
+#detailView .detail-contact-action{width:44px!important;height:40px!important;border-radius:12px!important;background:rgba(13,24,34,.88)!important;border:1px solid rgba(174,205,230,.48)!important;color:#fff!important;display:grid!important;place-items:center!important;padding:0!important}
+#detailView .detail-contact-action.wa{color:#31d158!important}
+#detailView .detail-contact-action svg{width:22px;height:22px;display:block}
+#detailView .detail-contact-action.wa svg{width:24px;height:24px}
+#detailView .detail-notes-v35{padding:9px 4px!important;font-size:12px!important}
+#detailView .detail-notes-v35 strong{margin-bottom:3px!important}
+#detailView .detail-actions-v35{gap:7px!important;margin-top:11px!important}
+#detailView .detail-actions-v35 .detail-btn{min-height:46px!important;border-radius:13px!important;font-size:10px!important}
+#detailView .detail-actions-v35 .detail-btn svg{width:19px;height:19px;vertical-align:middle;margin-right:4px}
+</style>
+<script id="detail-card-modern-v48">
+(function(){
+ const phoneSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M6.6 2.8 9.2 7c.4.7.3 1.5-.3 2l-1.5 1.2c1.2 2.7 3.3 4.8 6 6l1.2-1.5c.5-.6 1.3-.7 2-.3l4.2 2.6c.7.4 1 1.2.7 1.9-.7 1.7-2.3 2.8-4.1 2.8C9 21.7 2.3 15 2.3 6.6c0-1.8 1.1-3.4 2.8-4.1.6-.3 1.2-.1 1.5.3Z"/></svg>';
+ const waSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.4-4.7A8.5 8.5 0 1 1 20.5 11.7Z"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M8.3 7.6c.2-.4.5-.4.8-.4h.5c.2 0 .4.1.5.4l.9 2.1c.1.3.1.5-.1.7l-.7.8c-.2.2-.2.4-.1.6.8 1.7 2.1 3 3.8 3.8.2.1.4.1.6-.1l.8-.9c.2-.2.5-.3.7-.1l2 .9c.3.1.4.3.4.6 0 .4-.2 1.2-.7 1.7-.5.5-1.4.8-2.2.8-1.3 0-3.2-.6-5.3-2.4-2.4-2.1-3.7-4.7-3.7-6.4 0-.8.3-1.5.7-2Z"/></svg>';
+ renderDetail=function(){
+  const e=state.events.find(x=>String(x.id)===String(state.detailId)),c=$("detailContent");
+  if(!e){c.innerHTML='<div class="empty">No se encontró la prestación.</div>';return}
+  const testLabel=e.test?(e.testEnd?`${e.test} a ${e.testEnd}`:e.test):"—",hasPhone=!!cleanText(e.phone);
+  c.innerHTML=`<article class="detail-card"><div class="detail-head"><div class="detail-head-copy"><div class="detail-date">${formatDateWithWeekday(e.date)}</div><h2 class="detail-title">${e.artist}</h2><div class="detail-subplace">${e.place||''}</div></div><div class="detail-status ${safeClass(e.status)}">${e.status.toLocaleUpperCase('es-CL')}</div></div>
+  <div class="detail-times"><div class="detail-time"><div class="detail-time-label">🚌 SALIDA</div><strong>${e.departure||'—'}</strong></div><div class="detail-time"><div class="detail-time-label">🎚️ PRUEBA DE SONIDO</div><strong class="detail-test-range">${testLabel}</strong></div><div class="detail-time"><div class="detail-time-label">🎤 SHOW</div><strong>${e.show||'—'}</strong></div></div>
+  ${(e.place||e.placeAddress||e.meeting||e.meetingAddress)?`<div class="detail-location-pair"><div class="detail-location-cell"><span class="detail-location-icon">📍</span><span class="detail-location-copy"><b>${e.place||'LOCALIDAD'}</b>${e.placeAddress?`<small>${e.placeAddress}</small>`:''}</span></div><div class="detail-location-cell"><span class="detail-location-icon">📌</span><span class="detail-location-copy"><b>${e.meeting||'PUNTO DE ENCUENTRO'}</b>${e.meetingAddress?`<small>${e.meetingAddress}</small>`:''}</span></div></div>`:''}
+  ${(e.contact||hasPhone)?`<div class="detail-contact-row"><div class="detail-contact-name"><span class="detail-contact-icon">👤</span><span>${e.contact||'CONTACTO'}</span></div>${hasPhone?`<button id="detailCallV35" class="detail-contact-action" type="button" aria-label="Llamar">${phoneSvg}</button><button id="detailWaV35" class="detail-contact-action wa" type="button" aria-label="WhatsApp">${waSvg}</button>`:'<span></span><span></span>'}</div>`:''}
+  ${e.status==='Va Remplazo'&&e.replacementPerson?`<div class="detail-notes-v35"><strong>👤 REEMPLAZA</strong>${e.replacementPerson}</div>`:''}${e.notes?`<div class="detail-notes-v35"><strong>📝 NOTAS</strong>${e.notes}</div>`:''}
+  <div class="detail-actions-v35"><button id="detailDelete" class="detail-btn danger" type="button">🗑️ ELIMINAR</button><button id="detailEdit" class="detail-btn" type="button">✏️ EDITAR</button><button id="detailShare" class="detail-btn share" type="button">↗ COMPARTIR</button></div></article>`;
+  if($("detailCallV35"))$("detailCallV35").onclick=()=>{const d=phoneDigitsV18(e.phone);if(d)window.location.href='tel:+'+d};
+  if($("detailWaV35"))$("detailWaV35").onclick=()=>{const d=phoneDigitsV18(e.phone);if(d)window.location.href='https://wa.me/'+d};
+  $("detailShare").onclick=()=>shareEventV18(e);$("detailEdit").onclick=()=>openEditForm(e.id,'detail');$("detailDelete").onclick=()=>deleteEventFromDetail(e.id);
+ };
+ if(state.view==='detail')renderDetail();
+})();
+</script>
