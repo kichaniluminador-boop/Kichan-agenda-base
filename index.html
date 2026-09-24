@@ -547,6 +547,14 @@ body:has(#actionSheet.show){overflow:hidden!important}
 .compact-action .cal-action-icon{margin-right:3px}
 .set-next-v50 .cal-star-icon{width:18px;height:18px;margin-right:4px}
 </style>
+
+<style id="form-placeholder-polish-v60">
+/* V60 — solo presentación de ejemplos/fecha/icono Localidad */
+#formView .example-placeholder::placeholder{color:rgba(255,255,255,.38)!important;opacity:1!important;font-weight:500!important;}
+#formView .date-control-display{font-size:.92em!important;font-weight:600!important;letter-spacing:.01em!important;opacity:.72!important;}
+#formView .form-line-icon{display:inline-flex;width:17px;height:17px;vertical-align:-3px;color:var(--accent, currentColor);}
+#formView .form-line-icon svg{width:100%;height:100%;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 3px currentColor);}
+</style>
 </head>
 <body>
 <div id="licenseGate" class="license-gate">
@@ -675,17 +683,17 @@ body:has(#actionSheet.show){overflow:hidden!important}
   <div class="brand">KICHAN ILUMINADOR</div><h1 id="formTitle" class="page-title">Nueva prestación</h1>
   <form id="eventForm" class="form-card">
     <div class="field date-field"><label for="date">📅 FECHA DE PRESTACIÓN</label><div class="date-control-wrap"><input id="date" class="control" type="date" required><span id="dateControlDisplay" class="date-control-display">FECHA DE PRESTACIÓN</span></div></div>
-    <div class="field"><label for="artist">🎤 BANDA / ARTISTA / PRODUCTORA</label><input id="artist" class="control" type="text" placeholder="BANDA / ARTISTA / PRODUCTORA" autocomplete="off" required></div>
-    <div class="field"><label for="place">📍 LOCALIDAD</label><input id="place" class="control" type="text" placeholder="EJ: CASA MUSA" autocomplete="off"></div>
-    <div class="field"><label for="placeAddress">DIRECCIÓN LOCALIDAD</label><input id="placeAddress" class="control" type="text" placeholder="DIRECCIÓN" autocomplete="off"></div>
-    <div class="field"><label for="meeting">📌 PUNTO DE ENCUENTRO</label><input id="meeting" class="control" type="text" placeholder="EJ: PLU" autocomplete="off"></div>
-    <div class="meeting-row"><div class="field compact-field"><label for="meetingAddress">DIRECCIÓN PUNTO DE ENCUENTRO</label><input id="meetingAddress" class="control" type="text" placeholder="DIRECCIÓN" autocomplete="off"></div><div class="field compact-field"><label for="departure">🚌 HORA SALIDA</label><input id="departure" class="control" type="time"></div></div>
+    <div class="field"><label for="artist">🎤 BANDA / ARTISTA / PRODUCTORA</label><input id="artist" class="control example-placeholder" type="text" placeholder="BANDA / ARTISTA / PRODUCTORA" autocomplete="off" required></div>
+    <div class="field"><label for="place"><span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span> LOCALIDAD</label><input id="place" class="control example-placeholder" type="text" placeholder="Ej: Teatro Municipal" autocomplete="off"></div>
+    <div class="field"><label for="placeAddress">DIRECCIÓN LOCALIDAD</label><input id="placeAddress" class="control example-placeholder" type="text" placeholder="DIRECCIÓN" autocomplete="off"></div>
+    <div class="field"><label for="meeting">📌 PUNTO DE ENCUENTRO</label><input id="meeting" class="control example-placeholder" type="text" placeholder="Ej: Sala de ensayo" autocomplete="off"></div>
+    <div class="meeting-row"><div class="field compact-field"><label for="meetingAddress">DIRECCIÓN PUNTO DE ENCUENTRO</label><input id="meetingAddress" class="control example-placeholder" type="text" placeholder="DIRECCIÓN" autocomplete="off"></div><div class="field compact-field"><label for="departure">🚌 HORA SALIDA</label><input id="departure" class="control" type="time"></div></div>
     <div class="time-row"><div class="field compact-field"><label>🎚️ HORA PRUEBA</label><div class="soundcheck-wrap"><input id="test" class="control" type="time"><span class="soundcheck-sep">a</span><input id="testEnd" class="control" type="time"></div></div><div class="field compact-field"><label for="show">🎤 HORA SHOW</label><input id="show" class="control" type="time"></div></div>
-    <div class="field"><label for="contact">👤 CONTACTO</label><input id="contact" class="control" type="text" placeholder="CONTACTO" autocomplete="off"></div>
-    <div class="field"><label for="phone">📱 TELÉFONO</label><input id="phone" class="control" type="tel" placeholder="TELÉFONO" autocomplete="tel"></div>
-    <div class="status-row"><div class="field compact-field"><label for="status">✅ ESTADO</label><select id="status" class="control"><option value="Confirmado">Confirmado</option><option value="Por confirmar">Por confirmar</option><option value="Va Remplazo">Va Remplazo</option><option value="Cancelado">Cancelado</option></select></div><div class="field compact-field"><label for="payment">💰 PAGO</label><select id="payment" class="control"><option value="Pagado">Pagado</option><option value="Pendiente">Pendiente</option></select></div></div><div id="replacementPersonField" class="field" style="display:none"><label for="replacementPerson">👤 REEMPLAZA</label><input id="replacementPerson" class="control" type="text" placeholder="REEMPLAZA" autocomplete="off"></div>
+    <div class="field"><label for="contact">👤 CONTACTO</label><input id="contact" class="control example-placeholder" type="text" placeholder="CONTACTO" autocomplete="off"></div>
+    <div class="field"><label for="phone">📱 TELÉFONO</label><input id="phone" class="control example-placeholder" type="tel" placeholder="TELÉFONO" autocomplete="tel"></div>
+    <div class="status-row"><div class="field compact-field"><label for="status">✅ ESTADO</label><select id="status" class="control"><option value="Confirmado">Confirmado</option><option value="Por confirmar">Por confirmar</option><option value="Va Remplazo">Va Remplazo</option><option value="Cancelado">Cancelado</option></select></div><div class="field compact-field"><label for="payment">💰 PAGO</label><select id="payment" class="control"><option value="Pagado">Pagado</option><option value="Pendiente">Pendiente</option></select></div></div><div id="replacementPersonField" class="field" style="display:none"><label for="replacementPerson">👤 REEMPLAZA</label><input id="replacementPerson" class="control example-placeholder" type="text" placeholder="REEMPLAZA" autocomplete="off"></div>
     <div class="money-row"><div class="field compact-field"><label for="amount">💵 MONTO ACORDADO</label><div class="money-wrap"><input id="amount" class="control" type="text" inputmode="numeric" placeholder="0"></div></div><div class="field compact-field"><label for="extra">💰 EXTRA</label><div class="money-wrap"><input id="extra" class="control" type="text" inputmode="numeric" placeholder="0"></div></div></div>
-    <div class="field"><label for="notes">📝 NOTAS</label><textarea id="notes" class="control" placeholder="NOTAS"></textarea></div>
+    <div class="field"><label for="notes">📝 NOTAS</label><textarea id="notes" class="control example-placeholder" placeholder="NOTAS"></textarea></div>
     <div class="form-actions"><button id="cancelFormBtn" class="action" type="button">CANCELAR</button><button id="saveFormBtn" class="action save" type="button">💾 GUARDAR</button></div>
   </form>
 </section>
@@ -1384,6 +1392,40 @@ renderDetail=function(){renderDetailV35();const e=state.events.find(x=>String(x.
 .compact-card .modern-contact-icon-v51 svg{width:22px!important;height:22px!important;display:block!important}
 .compact-card .modern-contact-icon-v51.wa svg{width:24px!important;height:24px!important}
 </style>
+
+<style id="v63-form-all-icons-white">
+/* V63 — todos los iconos del formulario: lineales y blancos */
+#formView .form-line-icon{color:#fff!important;filter:none!important}
+#formView .form-line-icon svg{stroke:#fff!important;filter:none!important}
+</style>
+<script id="v63-form-all-icons-white-js">
+(()=>{
+ const I={
+  date:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span>',
+  artist:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 18v3M8 21h8"/><rect x="8" y="3" width="8" height="13" rx="4"/><path d="M5 10a7 7 0 0 0 14 0"/></svg></span>',
+  place:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>',
+  meeting:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22V12"/><path d="M8 3h8l-1 6 3 3H6l3-3-1-6Z"/></svg></span>',
+  departure:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="13" rx="3"/><path d="M7 18v2M17 18v2M4 10h16M8 14h.01M16 14h.01"/></svg></span>',
+  test:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16V8M12 16V4M17 16v-5"/><path d="M5 8h4M10 4h4M15 11h4"/></svg></span>',
+  show:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 18v3M8 21h8"/><rect x="8" y="3" width="8" height="13" rx="4"/><path d="M5 10a7 7 0 0 0 14 0"/></svg></span>',
+  contact:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>',
+  phone:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.6 2.8 9.2 7c.4.7.3 1.5-.3 2l-1.5 1.2c1.2 2.7 3.3 4.8 6 6l1.2-1.5c.5-.6 1.3-.7 2-.3l4.2 2.6c.7.4 1 1.2.7 1.9-.7 1.7-2.3 2.8-4.1 2.8C9 21.7 2.3 15 2.3 6.6c0-1.8 1.1-3.4 2.8-4.1.6-.3 1.2-.1 1.5.3Z"/></svg></span>',
+  status:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg></span>',
+  payment:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.8-1.8-1.2-3-1.2-1.8 0-3 .9-3 2.2 0 3.4 6 1.5 6 5 0 1.3-1.2 2.3-3.1 2.3-1.4 0-2.7-.5-3.5-1.5M12 5.5v13"/></svg></span>',
+  replacement:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>',
+  amount:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 12h.01M17 12h.01"/><circle cx="12" cy="12" r="2.5"/></svg></span>',
+  extra:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8h7.5a2.5 2.5 0 0 1 0 5H9.5a2.5 2.5 0 0 0 0 5H17"/></svg></span>',
+  notes:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5Z"/><path d="M16 3v4h4M8 11h8M8 15h8"/></svg></span>',
+  save:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3h12l2 2v16H5Z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></svg></span>'
+ };
+ const set=(id,icon,text)=>{const el=document.querySelector(`#formView label[for="${id}"]`);if(el)el.innerHTML=I[icon]+text};
+ set('date','date','FECHA DE PRESTACIÓN'); set('artist','artist','BANDA / ARTISTA / PRODUCTORA'); set('place','place','LOCALIDAD');
+ set('meeting','meeting','PUNTO DE ENCUENTRO'); set('departure','departure','HORA SALIDA'); set('test','test','HORA PRUEBA'); set('show','show','HORA SHOW');
+ set('contact','contact','CONTACTO'); set('phone','phone','TELÉFONO'); set('status','status','ESTADO'); set('payment','payment','PAGO');
+ set('replacementPerson','replacement','REEMPLAZA'); set('amount','amount','MONTO ACORDADO'); set('extra','extra','EXTRA'); set('notes','notes','NOTAS');
+ const b=document.querySelector('#formView #saveFormBtn'); if(b)b.innerHTML=I.save+'GUARDAR';
+})();
+</script>
 </body>
 </html>
 
@@ -1836,3 +1878,35 @@ renderAll();
   stroke:currentColor!important;
 }
 </style>
+
+<style id="v62-form-white-line-icons">
+/* V62 — iconos lineales blancos SOLO en el formulario */
+#formView .field>label .form-line-icon,
+#formView .compact-field>label .form-line-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;margin-right:6px;vertical-align:-4px;color:#fff!important;
+}
+#formView .form-line-icon svg{width:19px;height:19px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:none!important}
+#formView #saveFormBtn .form-line-icon{width:20px;height:20px;margin-right:7px;vertical-align:-4px;color:#fff!important;display:inline-flex}
+#formView #saveFormBtn .form-line-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:none!important}
+</style>
+<script id="v62-form-white-line-icons-js">
+(()=>{
+ const I={
+  test:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16V8M12 16V4M17 16v-5"/><path d="M5 8h4M10 4h4M15 11h4"/></svg></span>',
+  show:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 18v3M8 21h8"/><rect x="8" y="3" width="8" height="13" rx="4"/><path d="M5 10a7 7 0 0 0 14 0"/></svg></span>',
+  contact:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>',
+  phone:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.6 2.8 9.2 7c.4.7.3 1.5-.3 2l-1.5 1.2c1.2 2.7 3.3 4.8 6 6l1.2-1.5c.5-.6 1.3-.7 2-.3l4.2 2.6c.7.4 1 1.2.7 1.9-.7 1.7-2.3 2.8-4.1 2.8C9 21.7 2.3 15 2.3 6.6c0-1.8 1.1-3.4 2.8-4.1.6-.3 1.2-.1 1.5.3Z"/></svg></span>',
+  status:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg></span>',
+  payment:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.8-1.8-1.2-3-1.2-1.8 0-3 .9-3 2.2 0 3.4 6 1.5 6 5 0 1.3-1.2 2.3-3.1 2.3-1.4 0-2.7-.5-3.5-1.5M12 5.5v13"/></svg></span>',
+  amount:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 12h.01M17 12h.01"/><circle cx="12" cy="12" r="2.5"/></svg></span>',
+  extra:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8h7.5a2.5 2.5 0 0 1 0 5H9.5a2.5 2.5 0 0 0 0 5H17"/></svg></span>',
+  notes:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5Z"/><path d="M16 3v4h4M8 11h8M8 15h8"/></svg></span>',
+  save:'<span class="form-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3h12l2 2v16H5Z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></svg></span>'
+ };
+ const set=(id,icon,text)=>{const el=document.querySelector(`#formView label[for="${id}"]`);if(el)el.innerHTML=I[icon]+text};
+ set('test','test','HORA PRUEBA'); set('show','show','HORA SHOW'); set('contact','contact','CONTACTO'); set('phone','phone','TELÉFONO');
+ set('status','status','ESTADO'); set('payment','payment','PAGO'); set('amount','amount','MONTO ACORDADO'); set('extra','extra','EXTRA'); set('notes','notes','NOTAS');
+ const b=document.querySelector('#formView #saveFormBtn'); if(b)b.innerHTML=I.save+'GUARDAR';
+})();
+</script>
