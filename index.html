@@ -1697,13 +1697,21 @@ renderAll();
 <style id="next-day-selector-v50">
 #homeView #nextHeroCard{position:relative!important}
 #homeView .next-hero-head{position:relative!important}#homeView .next-day-counter-v50{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:12;min-width:42px;height:25px;padding:0 8px;border-radius:14px;border:1px solid currentColor;background:rgba(7,16,24,.88);color:var(--accent,#35c9ff);font-size:10px;font-weight:900;letter-spacing:.4px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 8px color-mix(in srgb,currentColor 28%,transparent)}
-#calendarView .set-next-v50{width:100%;margin:8px 0 2px;padding:10px 12px;border-radius:13px;border:1px solid var(--accent,#35c9ff);background:rgba(8,18,27,.78);color:var(--accent,#35c9ff);font-size:11px;font-weight:900;letter-spacing:.35px;text-transform:uppercase}
-#calendarView .set-next-v50.is-next{background:color-mix(in srgb,var(--accent,#35c9ff) 14%,rgba(8,18,27,.9));box-shadow:0 0 10px color-mix(in srgb,var(--accent,#35c9ff) 25%,transparent)}
+#calendarView .set-next-v50{display:flex;align-items:center;justify-content:center;width:max-content;max-width:100%;margin:9px auto 1px;padding:5px 8px;border:0;background:transparent;color:var(--muted);font-size:9px;font-weight:850;letter-spacing:.3px;text-transform:uppercase;opacity:.78}
+#calendarView .set-next-v50 .cal-star-icon{width:14px;height:14px;margin-right:4px;color:var(--gold)!important}
+#calendarView .set-next-v50.is-next{color:var(--gold);opacity:.9;background:transparent;box-shadow:none}
+#calendarView .set-next-v50:active{opacity:1;transform:scale(.98)}
 </style>
 <script id="next-day-selector-v50-js">
 (()=>{
  const getUpcoming=()=>sortEvents((state.events||[]).filter(e=>e.date>=todayString()));
  const getNext=()=>getUpcoming()[0]||null;
+ const getPrevious=()=>{
+   const past=sortEvents((state.events||[]).filter(e=>e.date<todayString()));
+   if(!past.length)return null;
+   const lastDate=past[past.length-1].date;
+   return sortEvents(past.filter(e=>e.date===lastDate))[0]||null;
+ };
  const goDay=ds=>{
    const d=parseLocalDate(ds);if(!d)return;
    state.calendarYear=d.getFullYear();state.calendarMonth=d.getMonth();state.selectedDate=ds;showView('calendar');
@@ -1727,15 +1735,17 @@ renderAll();
    const cards=[...document.querySelectorAll('#selectedDateEvents .compact-card[data-event-id]')];
    const day=sortEvents((state.events||[]).filter(e=>e.date===state.selectedDate));
    if(day.length<2)return;
-   const current=getNext();
+   const isPast=state.selectedDate<todayString();
+   const current=isPast?getPrevious():getNext();
    cards.forEach(card=>{
      card.querySelector('.set-next-v50')?.remove();
      const id=card.dataset.eventId,e=state.events.find(x=>String(x.id)===String(id));if(!e)return;
-     const isNext=current&&String(current.id)===String(id);
-     const b=document.createElement('button');b.type='button';b.className='set-next-v50'+(isNext?' is-next':'');b.innerHTML=(isNext?'<span class="cal-action-icon cal-star-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2-4.5-4.4 6.2-.9Z"/></svg></span> EN PRÓXIMO':'<span class="cal-action-icon cal-star-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2-4.5-4.4 6.2-.9Z"/></svg></span> DEJAR EN PRÓXIMO');
+     const isSelected=current&&String(current.id)===String(id);
+     const label=isPast?(isSelected?' ANTERIOR SELECCIONADA':' DEJAR EN ANTERIOR'):(isSelected?' EN PRÓXIMO':' DEJAR EN PRÓXIMO');
+     const b=document.createElement('button');b.type='button';b.className='set-next-v50'+(isSelected?' is-next':'');b.innerHTML='<span class="cal-action-icon cal-star-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2-4.5-4.4 6.2-.9Z"/></svg></span>'+label;
      b.onclick=ev=>{
        ev.preventDefault();ev.stopPropagation();
-       if(isNext)return;
+       if(isSelected)return;
        const same=state.events.filter(x=>x.date===e.date);
        same.forEach(x=>x.priority=1000);
        e.priority=0;
