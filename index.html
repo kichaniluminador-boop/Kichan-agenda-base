@@ -1663,3 +1663,22 @@ renderAll();
 #bottomNav .nav-btn:nth-child(3) span{font-size:25px!important;} /* Finanzas */
 #bottomNav .nav-btn:nth-child(4) span{font-size:25px!important;} /* Ajustes */
 </style>
+
+<style id="v59-modern-bottom-nav">
+/* V59 — iconografía lineal moderna + barra ligeramente más baja */
+#bottomNav.bottom-nav{transform:translate(-50%,6px)!important;}
+#bottomNav .nav-btn span{width:28px!important;height:28px!important;margin:0 auto 3px!important;font-size:0!important;}
+#bottomNav .nav-btn span svg{width:27px;height:27px;display:block;fill:none;stroke:currentColor;stroke-width:2.15;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px currentColor)}
+#bottomNav .nav-btn:nth-child(4) span svg{width:29px;height:29px}
+</style>
+<script id="v59-modern-bottom-nav-js">
+(()=>{
+ const icons=[
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.8 12 3l9 7.8"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6.5h5V21"/></svg>',
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>',
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.8-1.8-1.2-3-1.2-1.8 0-3 .9-3 2.2 0 3.4 6 1.5 6 5 0 1.3-1.2 2.3-3.1 2.3-1.4 0-2.7-.5-3.5-1.5M12 5.5v13"/></svg>',
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 8.96 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3v-4h.08A1.7 1.7 0 0 0 4.6 8.96a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 8.96 4.6 1.7 1.7 0 0 0 10 3.08V3h4v.08a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06a1.7 1.7 0 0 0-.34 1.88A1.7 1.7 0 0 0 20.92 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></svg>'
+ ];
+ document.querySelectorAll('#bottomNav .nav-btn span').forEach((el,i)=>{if(icons[i])el.innerHTML=icons[i]});
+})();
+</script>
