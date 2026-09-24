@@ -1245,7 +1245,16 @@ function iniciarLicencia(){
   btn.onclick=()=>activarLicencia(input.value);
   input.addEventListener("keydown",e=>{if(e.key==="Enter")activarLicencia(input.value)});
   const guardada=localStorage.getItem(LICENSE_STORAGE_KEY)||"";
-  if(guardada){input.value=guardada;activarLicencia(guardada,true)}else{if($("licenseGate"))$("licenseGate").style.display="flex";setTimeout(()=>input.focus(),100);}
+  if(guardada){
+    /* Licencia ya guardada: validar en silencio para evitar el destello del gate. */
+    document.body.classList.add("license-checking");
+    input.value=guardada;
+    activarLicencia(guardada,true).finally(()=>document.body.classList.remove("license-checking"));
+  }else{
+    document.body.classList.remove("license-checking");
+    if($("licenseGate"))$("licenseGate").style.display="flex";
+    setTimeout(()=>input.focus(),100);
+  }
 }
 if($("chromaticHue"))$("chromaticHue").addEventListener("input",e=>applyTheme(hueToHex(e.target.value)));
 applyProfile();
@@ -2008,6 +2017,9 @@ body:not(.license-authorized) #bottomNav{
   user-select:none!important;
 }
 body:not(.license-authorized){overflow:hidden!important;}
+/* Si existe una licencia guardada, durante su validación automática mostramos
+   solo el fondo neutro: nunca se alcanza a pintar "Activar Agenda". */
+body.license-checking #licenseGate{visibility:hidden!important;pointer-events:none!important;}
 body.license-authorized main.app,
 body.license-authorized #bottomNav{visibility:visible;}
 </style>
