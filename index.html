@@ -447,6 +447,19 @@ body::after{content:"";position:fixed;z-index:0;inset:0;pointer-events:none;back
 #bottomNav.bottom-nav{z-index:1000!important}
 body:has(#actionSheet.show){overflow:hidden!important}
 </style>
+
+<style id="v51-general-counters">
+/* Contadores generales históricos: compactos, 5 accesos de solo consulta. PRÓXIMO no se modifica. */
+#homeView .general-stats-v51{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin-bottom:12px}
+#homeView .general-stats-v51 .stat{padding:8px 2px 7px;border-radius:14px;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#homeView .general-stats-v51 .stat-number{font-size:18px;line-height:1;font-weight:900}
+#homeView .general-stats-v51 .stat-label{margin-top:5px;font-size:6.6px;line-height:1.12;letter-spacing:.15px;white-space:normal}
+#homeView .stat-total-v51 .stat-number{color:var(--gold)}
+#homeView .stat-confirmed-v51 .stat-number{color:#38df73}
+#homeView .stat-replacement-v51 .stat-number{color:#35a7ff}
+#homeView .stat-toconfirm-v51 .stat-number{color:#ffd84a}
+#homeView .stat-cancelled-v51 .stat-number{color:#ff4d5e}
+</style>
 </head>
 <body>
 <div id="licenseGate" class="license-gate">
@@ -487,11 +500,12 @@ body:has(#actionSheet.show){overflow:hidden!important}
       </div>
       <div id="nextHeroExtra" class="next-extra"></div>
     </article>
-    <div class="stats">
-      <div id="totalCard" class="stat clickable"><div id="statTotal" class="stat-number">0</div><div class="stat-label">Prestaciones</div></div>
-      <div id="confirmedCard" class="stat clickable"><div id="statConfirmed" class="stat-number">0</div><div class="stat-label">Confirmadas</div></div>
-      <div id="replacementCard" class="stat clickable"><div id="statReplacement" class="stat-number">0</div><div class="stat-label">Reemplazos</div></div>
-      <div id="nextCard" class="stat clickable"><div id="statNext" class="stat-number next-date">—</div><div class="stat-label">Próxima</div></div>
+    <div class="stats general-stats-v51">
+      <div id="totalCard" class="stat clickable stat-total-v51"><div id="statTotal" class="stat-number">0</div><div class="stat-label">Total<br>prestaciones</div></div>
+      <div id="confirmedCard" class="stat clickable stat-confirmed-v51"><div id="statConfirmed" class="stat-number">0</div><div class="stat-label">Confirmadas</div></div>
+      <div id="replacementCard" class="stat clickable stat-replacement-v51"><div id="statReplacement" class="stat-number">0</div><div class="stat-label">Reemplazos</div></div>
+      <div id="toConfirmCard" class="stat clickable stat-toconfirm-v51"><div id="statToConfirm" class="stat-number">0</div><div class="stat-label">Por<br>confirmar</div></div>
+      <div id="cancelledCard" class="stat clickable stat-cancelled-v51"><div id="statCancelled" class="stat-number">0</div><div class="stat-label">Canceladas</div></div>
     </div>
     <button id="newEventBtn" class="primary">+ NUEVA PRESTACIÓN</button>
   </div>
@@ -882,7 +896,8 @@ function renderHome(){
  $("statTotal").textContent=all.length;
  $("statConfirmed").textContent=all.filter(e=>e.status==="Confirmado").length;
  $("statReplacement").textContent=all.filter(e=>e.status==="Va Remplazo").length;
- $("statNext").textContent=up[0]?formatDateWithWeekday(up[0].date).replace(/^(\S+)\s/,"$1\n"):"—";
+ $("statToConfirm").textContent=all.filter(e=>e.status==="Por confirmar").length;
+ $("statCancelled").textContent=all.filter(e=>e.status==="Cancelado").length;
 
  // Inicio: lista completa del mes actual debajo de la tarjeta Próximo.
  const now=new Date();
@@ -988,7 +1003,7 @@ function renderSelectedDate(){
 }
 function renderSummary(){const paid=state.events.filter(e=>e.payment==="Pagado"),pending=state.events.filter(e=>e.payment!=="Pagado");$("sumPaid").textContent=paid.length;$("sumPending").textContent=pending.length;$("sumPaidMoney").textContent=formatMoney(paid.reduce((s,e)=>s+e.amount,0));$("sumPendingMoney").textContent=formatMoney(pending.reduce((s,e)=>s+e.amount,0))}
 function openSimpleList(filter,title){state.listFilter=filter;state.listReturnView=(filter==="paid"||filter==="pending")?"summary":"home";$("listTitle").textContent=title;showView("list")}
-function renderSimpleList(){const f=state.listFilter;let a=state.events;if(f==="confirmed")a=a.filter(e=>e.status==="Confirmado");if(f==="replacement")a=a.filter(e=>e.status==="Va Remplazo");if(f==="paid")a=a.filter(e=>e.payment==="Pagado");if(f==="pending")a=a.filter(e=>e.payment!=="Pagado");const c=$("simpleList");c.innerHTML="";const detailed=(f==="all"||f==="confirmed"||f==="replacement");sortEvents(a).forEach(e=>{if(detailed){const card=makeCompactCard(e,false);card.style.cursor="pointer";card.onclick=ev=>{if(ev.target.closest(".compact-link")||ev.target.closest("a"))return;openEditForm(e.id,"list")};c.appendChild(card)}else{const b=document.createElement("button");b.type="button";b.className="simple-item";b.innerHTML=`<strong>${e.artist}</strong>${e.place?`<div style="margin:6px 0;color:#d0d0d0;font-size:14px">📍 ${e.place}</div>`:""}<span>📅 ${formatDateWithWeekday(e.date)}</span>`;b.onclick=()=>openEditForm(e.id,"list");c.appendChild(b)}});if(!a.length)c.innerHTML='<div class="empty">No hay prestaciones en esta lista.</div>'}
+function renderSimpleList(){const f=state.listFilter;let a=state.events;if(f==="confirmed")a=a.filter(e=>e.status==="Confirmado");if(f==="replacement")a=a.filter(e=>e.status==="Va Remplazo");if(f==="toconfirm")a=a.filter(e=>e.status==="Por confirmar");if(f==="cancelled")a=a.filter(e=>e.status==="Cancelado");if(f==="paid")a=a.filter(e=>e.payment==="Pagado");if(f==="pending")a=a.filter(e=>e.payment!=="Pagado");const c=$("simpleList");c.innerHTML="";const statusList=["all","confirmed","replacement","toconfirm","cancelled"].includes(f);sortEvents(a).forEach(e=>{if(statusList){const card=makeCompactCard(e,false);card.style.cursor="default";card.querySelectorAll("button,a").forEach(x=>{x.style.pointerEvents="none";x.setAttribute("tabindex","-1")});c.appendChild(card)}else{const b=document.createElement("div");b.className="simple-item";b.innerHTML=`<strong>${e.artist}</strong>${e.place?`<div style="margin:6px 0;color:#d0d0d0;font-size:14px">📍 ${e.place}</div>`:""}<span>📅 ${formatDateWithWeekday(e.date)}</span>`;c.appendChild(b)}});if(!a.length)c.innerHTML='<div class="empty">No hay prestaciones en esta lista.</div>'}
 function clearForm(){$("eventForm").reset();$("status").value="Confirmado";$("payment").value="Pendiente";$("dateControlDisplay").textContent="FECHA DE PRESTACIÓN";$("amount").value="";$("extra").value="";updateReplacementField()}
 function openNewForm(date="",ret="home"){state.editingId=null;state.returnView=ret;clearForm();$("formTitle").textContent="Nueva prestación";if(date){$("date").value=date;updateDatePreview()}showView("form")}
 function openEditForm(id,ret="home"){const e=state.events.find(x=>String(x.id)===String(id));if(!e)return;state.editingId=String(e.id);state.returnView=ret;$("formTitle").textContent="Editar prestación";["date","artist","place","placeAddress","meeting","meetingAddress","departure","test","testEnd","show","contact","phone","status","payment","replacementPerson","notes"].forEach(k=>$(k).value=e[k]||"");$("amount").value=formatAmountInput(e.amount);$("extra").value=formatAmountInput(e.extra);updateReplacementField();updateDatePreview();showView("form")}
@@ -1039,7 +1054,7 @@ $("date").onchange=updateDatePreview;$("status").onchange=updateReplacementField
 ["artist","place","placeAddress","meeting","meetingAddress","contact","replacementPerson","notes"].forEach(id=>$(id).addEventListener("input",e=>{const s=e.target.selectionStart;e.target.value=e.target.value.toLocaleUpperCase("es-CL");try{e.target.setSelectionRange(s,s)}catch{}}));
 $("amount").oninput=()=>{const d=$("amount").value.replace(/\D/g,"");$("amount").value=d?new Intl.NumberFormat("es-CL").format(+d):""};$("extra").oninput=()=>{const d=$("extra").value.replace(/\D/g,"");$("extra").value=d?new Intl.NumberFormat("es-CL").format(+d):""};
 $("eventForm").onsubmit=saveForm;if($("saveFormBtn"))$("saveFormBtn").onclick=(ev)=>saveForm(ev);$("cancelFormBtn").onclick=()=>{state.editingId=null;showView(state.returnView||"home")};
-$("totalCard").onclick=()=>openSimpleList("all","Prestaciones");$("confirmedCard").onclick=()=>openSimpleList("confirmed","Confirmadas");$("replacementCard").onclick=()=>openSimpleList("replacement","Reemplazos");$("nextCard").onclick=()=>{const n=sortEvents(state.events.filter(e=>e.date>=todayString()))[0];if(n)openDetail(n.id,"home")};
+$("totalCard").onclick=()=>openSimpleList("all","Total prestaciones");$("confirmedCard").onclick=()=>openSimpleList("confirmed","Confirmadas");$("replacementCard").onclick=()=>openSimpleList("replacement","Reemplazos");$("toConfirmCard").onclick=()=>openSimpleList("toconfirm","Por confirmar");$("cancelledCard").onclick=()=>openSimpleList("cancelled","Canceladas");
 $("paidCard").onclick=()=>openSimpleList("paid","Pagadas");$("pendingCard").onclick=()=>openSimpleList("pending","Pendientes");
 $("exportBtn").onclick=exportBackup;$("importBtn").onclick=()=>$("importFile").click();$("importFile").onchange=()=>importBackup($("importFile").files[0]);$("clearAgendaBtn").onclick=clearAgenda;if($("changeLicenseBtn"))$("changeLicenseBtn").onclick=cambiarLicencia;
 async function validarLicencia(codigo){
