@@ -331,6 +331,13 @@
 #formView .date-control-wrap #date{color:transparent!important;-webkit-text-fill-color:transparent!important}
 #formView .date-control-wrap #date::-webkit-date-and-time-value{color:transparent!important;-webkit-text-fill-color:transparent!important}
 #formView .date-control-display{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:var(--text);font-size:16px;font-weight:800;text-align:center;text-transform:uppercase}
+
+/* Buscador Inicio: X para limpiar */
+#homeView .home-search-wrap{position:relative}
+#homeView .home-search-wrap .control{padding-left:42px;padding-right:46px}
+#homeView .home-search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:0;border-radius:50%;background:rgba(255,255,255,.10);color:var(--accent,#7cff45);font-size:25px;line-height:28px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#homeView .home-search-clear.visible{display:flex}
+
 </style>
 
 <style>
@@ -509,7 +516,7 @@ body:has(#actionSheet.show){overflow:hidden!important}
     </div>
     <button id="newEventBtn" class="primary">+ NUEVA PRESTACIÓN</button>
   </div>
-  <div class="search-box"><input id="homeSearch" class="control" type="search" placeholder="🔍 Buscar artista, localidad o fecha"></div>
+  <div class="search-box home-search-wrap"><input id="homeSearch" class="control" type="search" placeholder="🔍 Buscar artista, localidad o fecha"><button id="clearHomeSearch" class="home-search-clear" type="button" aria-label="Limpiar búsqueda">×</button></div>
   <div id="homeMonthListTitle" class="section-title">Prestaciones del mes</div><div id="upcomingList"></div>
 </section>
 <section id="calendarView" class="view">
@@ -899,18 +906,24 @@ function renderHome(){
  $("statToConfirm").textContent=all.filter(e=>e.status==="Por confirmar").length;
  $("statCancelled").textContent=all.filter(e=>e.status==="Cancelado").length;
 
- // Inicio: lista completa del mes actual debajo de la tarjeta Próximo.
- const now=new Date();
- const key=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
- const monthName=new Intl.DateTimeFormat("es-CL",{month:"long",year:"numeric"}).format(now).toLocaleUpperCase("es-CL");
- const monthEvents=sortEvents(all.filter(e=>e.date.startsWith(key)));
+ // Inicio: debajo del buscador no se muestra nada hasta que el usuario busque.
+ // La búsqueda revisa todas las prestaciones, sin limitar por mes o año.
+ const q=upperText($("homeSearch")?.value||"").trim();
  const title=$("homeMonthListTitle");
- if(title)title.textContent=`${monthEvents.length} ${monthEvents.length===1?"PRESTACIÓN":"PRESTACIONES"} · ${monthName}`;
+ const c=$("upcomingList");
+ c.innerHTML="";
+ if(title)title.style.display="none";
+ if(!q)return;
 
- const q=upperText($("homeSearch")?.value||"");
- const shown=q?monthEvents.filter(e=>(e.artist+" "+e.place+" "+e.meeting+" "+formatDateWithWeekday(e.date)).toLocaleUpperCase("es-CL").includes(q)):monthEvents;
- const c=$("upcomingList");c.innerHTML="";
- if(!shown.length)c.innerHTML='<div class="empty">No hay prestaciones este mes.</div>';
+ const shown=sortEvents(all.filter(e=>(
+   (e.artist||"")+" "+(e.place||"")+" "+(e.placeAddress||"")+" "+
+   (e.meeting||"")+" "+(e.meetingAddress||"")+" "+formatDateWithWeekday(e.date)
+ ).toLocaleUpperCase("es-CL").includes(q)));
+ if(title){
+   title.style.display="block";
+   title.textContent=`${shown.length} ${shown.length===1?"RESULTADO":"RESULTADOS"} DE BÚSQUEDA`;
+ }
+ if(!shown.length)c.innerHTML='<div class="empty">No se encontraron prestaciones.</div>';
  else shown.forEach(e=>c.appendChild(makeCompactCard(e)));
 }
 
@@ -1042,7 +1055,17 @@ $("backListBtn").onclick=()=>showView(state.listReturnView||"home");
 $("detailBackBtn").onclick=()=>showView(state.detailReturnView||"home");
 $("selectedAddBtn").onclick=()=>openNewForm(state.selectedDate,"calendar");
 $("newEventBtn").onclick=()=>openNewForm("","home");
-$("homeSearch").oninput=renderHome;
+$("homeSearch").oninput=()=>{
+ const clear=$("clearHomeSearch");
+ if(clear)clear.classList.toggle("visible",!!$("homeSearch").value);
+ renderHome();
+};
+if($("clearHomeSearch"))$("clearHomeSearch").onclick=()=>{
+ $("homeSearch").value="";
+ $("clearHomeSearch").classList.remove("visible");
+ renderHome();
+ $("homeSearch").focus();
+};
 $("goTodayBtn").onclick=()=>{
  const d=new Date();
  state.calendarYear=d.getFullYear();state.calendarMonth=d.getMonth();
