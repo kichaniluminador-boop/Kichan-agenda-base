@@ -423,6 +423,30 @@ body::after{content:"";position:fixed;z-index:0;inset:0;pointer-events:none;back
 .detail-test-range{white-space:nowrap}
 @media(max-width:360px){.detail-location-cell{font-size:10px;padding-left:6px;padding-right:6px}.detail-actions-v35 .detail-btn{font-size:10px}}
 </style>
+
+<style>
+/* V38 — selector Cómo llegar como modal real del viewport */
+#actionSheet.action-sheet{
+ position:fixed!important; inset:0!important; z-index:10000!important;
+ width:100vw!important; height:100dvh!important; margin:0!important;
+ align-items:center!important; justify-content:center!important;
+ padding:20px!important; box-sizing:border-box!important;
+ background:rgba(0,0,0,.66)!important;
+ backdrop-filter:blur(6px)!important; -webkit-backdrop-filter:blur(6px)!important;
+}
+#actionSheet.action-sheet:not(.show){display:none!important}
+#actionSheet.action-sheet.show{display:flex!important}
+#actionSheet .action-sheet-panel{
+ position:relative!important; width:min(430px,calc(100vw - 36px))!important;
+ max-height:calc(100dvh - 60px)!important; overflow:auto!important;
+ margin:0!important; transform:none!important;
+ background:rgba(23,23,23,.97)!important;
+ box-shadow:0 22px 70px rgba(0,0,0,.72),0 0 22px rgba(var(--stage-rgb),.18)!important;
+}
+/* La navegación queda detrás del modal, nunca atravesándolo. */
+#bottomNav.bottom-nav{z-index:1000!important}
+body:has(#actionSheet.show){overflow:hidden!important}
+</style>
 </head>
 <body>
 <div id="licenseGate" class="license-gate">
@@ -661,7 +685,7 @@ async function sincronizarAgendaAlActivar(licencia){
  renderAll();
  showView("home");
 }
-function showView(view){state.view=view;document.querySelectorAll(".view").forEach(e=>e.classList.remove("active"));const t=$(view+"View");if(t)t.classList.add("active");document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.view===view));$("bottomNav").style.display=view==="form"?"none":"grid";if(view==="home")renderHome();if(view==="calendar")renderCalendar();if(view==="summary")renderSummary();if(view==="list")renderSimpleList();if(view==="detail")renderDetail();window.scrollTo(0,0)}
+function showView(view){closeActionSheet();state.view=view;document.querySelectorAll(".view").forEach(e=>e.classList.remove("active"));const t=$(view+"View");if(t)t.classList.add("active");document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.view===view));$("bottomNav").style.display=view==="form"?"none":"grid";if(view==="home")renderHome();if(view==="calendar")renderCalendar();if(view==="summary")renderSummary();if(view==="list")renderSimpleList();if(view==="detail")renderDetail();window.scrollTo(0,0)}
 function todayString(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 // Feriados nacionales regulares de Chile, calculados para cada año visible.
 function isoLocal(y,m,d){return `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`}
