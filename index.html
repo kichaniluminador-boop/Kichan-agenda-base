@@ -332,6 +332,20 @@
 #formView .date-control-wrap #date::-webkit-date-and-time-value{color:transparent!important;-webkit-text-fill-color:transparent!important}
 #formView .date-control-display{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:var(--text);font-size:16px;font-weight:800;text-align:center;text-transform:uppercase}
 </style>
+
+<style>
+/* CALENDARIO V30: feriados, lista diaria y prioridad */
+#calendarView .calendar-month-list{display:none!important}
+#calendarView .day.holiday{box-shadow:inset 0 0 0 1.5px #ff4d4d}
+#calendarView .day.holiday.today{box-shadow:inset 0 0 0 1.5px #ff4d4d!important}
+#calendarView .day.has-event{background:var(--gold);color:#050505;font-weight:950}
+#calendarView .day-count{font-size:9px;margin-top:3px}
+#selectedDateEvents .compact-card{position:relative}
+.calendar-priority{position:absolute;right:12px;top:12px;display:flex;align-items:center;gap:5px;z-index:2}
+.calendar-priority-label{color:var(--gold);font-size:9px;font-weight:950;min-width:18px;text-align:center}
+.calendar-priority-btn{width:27px;height:27px;padding:0;border:1px solid #444;border-radius:9px;background:#242424;color:var(--gold);font-weight:950;font-size:14px}
+#selectedDateEvents .compact-date{padding-right:92px}
+</style>
 </head>
 <body>
 <div id="licenseGate" class="license-gate">
@@ -518,8 +532,8 @@ function formatMoney(v){return "$"+new Intl.NumberFormat("es-CL",{maximumFractio
 function formatAmountInput(v){const n=numericAmount(v);return n?new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(n):""}
 function parseLocalDate(s){const p=normalizeDate(s).split("-");return p.length===3?new Date(+p[0],+p[1]-1,+p[2],12):null}
 function formatDateWithWeekday(s){const d=parseLocalDate(s);if(!d)return"";let w=new Intl.DateTimeFormat("es-CL",{weekday:"long"}).format(d);w=w[0].toUpperCase()+w.slice(1);return `${w} ${String(d.getDate()).padStart(2,"0")}-${String(d.getMonth()+1).padStart(2,"0")}-${d.getFullYear()}`}
-function normalizeEvent(r){if(!r||typeof r!=="object")return null;const date=normalizeDate(r.date??r.fecha),artist=cleanText(r.artist??r.artista??r.band??r.banda??r.nombre);if(!date||!artist)return null;return{id:cleanText(r.id)||makeId(),date,artist:upperText(artist),place:upperText(r.place??r.location??r.localidad??r.lugar),meeting:upperText(r.meeting??r.meetingPoint??r.puntoEncuentro??r.encuentro),departure:cleanText(r.departure??r.salida??r.horaSalida??r.arrival),test:cleanText(r.test??r.soundcheck??r.prueba??r.horaPrueba),testEnd:cleanText(r.testEnd??r.soundcheckEnd??r.pruebaFin??r.horaPruebaFin),show:cleanText(r.show??r.showtime??r.horaShow),contact:upperText(r.contact??r.contacto??r.contactName),phone:cleanText(r.phone??r.telefono??r.tel),status:cleanText(r.status??r.estado)||"Confirmado",payment:cleanText(r.payment??r.pago)||"Pendiente",amount:numericAmount(r.amount??r.monto),extra:numericAmount(r.extra??r.extras??r.montoExtra),replacementPerson:upperText(r.replacementPerson??r.reemplaza??r.reemplazante),notes:upperText(r.notes??r.notas)}}
-function sortEvents(a){return a.slice().sort((x,y)=>x.date.localeCompare(y.date)||(x.show||x.departure||"99:99").localeCompare(y.show||y.departure||"99:99"))}
+function normalizeEvent(r){if(!r||typeof r!=="object")return null;const date=normalizeDate(r.date??r.fecha),artist=cleanText(r.artist??r.artista??r.band??r.banda??r.nombre);if(!date||!artist)return null;return{id:cleanText(r.id)||makeId(),date,artist:upperText(artist),place:upperText(r.place??r.location??r.localidad??r.lugar),meeting:upperText(r.meeting??r.meetingPoint??r.puntoEncuentro??r.encuentro),departure:cleanText(r.departure??r.salida??r.horaSalida??r.arrival),test:cleanText(r.test??r.soundcheck??r.prueba??r.horaPrueba),testEnd:cleanText(r.testEnd??r.soundcheckEnd??r.pruebaFin??r.horaPruebaFin),show:cleanText(r.show??r.showtime??r.horaShow),contact:upperText(r.contact??r.contacto??r.contactName),phone:cleanText(r.phone??r.telefono??r.tel),status:cleanText(r.status??r.estado)||"Confirmado",payment:cleanText(r.payment??r.pago)||"Pendiente",amount:numericAmount(r.amount??r.monto),extra:numericAmount(r.extra??r.extras??r.montoExtra),replacementPerson:upperText(r.replacementPerson??r.reemplaza??r.reemplazante),notes:upperText(r.notes??r.notas),priority:Number.isFinite(Number(r.priority??r.prioridad))?Number(r.priority??r.prioridad):999}}
+function sortEvents(a){return a.slice().sort((x,y)=>x.date.localeCompare(y.date)||((Number(x.priority)||999)-(Number(y.priority)||999))||(x.show||x.departure||"99:99").localeCompare(y.show||y.departure||"99:99"))}
 function loadEvents(){try{const r=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");return Array.isArray(r)?sortEvents(r.map(normalizeEvent).filter(Boolean)):[]}catch{return[]}}
 function saveEvents(){
  state.events=sortEvents(state.events);
@@ -572,6 +586,9 @@ async function sincronizarAgendaAlActivar(licencia){
 }
 function showView(view){state.view=view;document.querySelectorAll(".view").forEach(e=>e.classList.remove("active"));const t=$(view+"View");if(t)t.classList.add("active");document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.view===view));$("bottomNav").style.display=view==="form"?"none":"grid";if(view==="home")renderHome();if(view==="calendar")renderCalendar();if(view==="summary")renderSummary();if(view==="list")renderSimpleList();if(view==="detail")renderDetail();window.scrollTo(0,0)}
 function todayString(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+// Feriados nacionales de Chile 2026, según calendario oficial de Gobierno de Chile.
+const CHILE_HOLIDAYS_2026=new Set(["2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25"]);
+function isChileHoliday(ds){return CHILE_HOLIDAYS_2026.has(ds)}
 function makeCompactCard(e,editable=true){
  const c=document.createElement("article");c.className="compact-card";
  const phone=phoneDigitsV18(e.phone);
@@ -581,8 +598,8 @@ function makeCompactCard(e,editable=true){
    <span class="badge ${safeClass(e.status)}">${e.status.toLocaleUpperCase("es-CL")}</span>
    <span class="badge ${safeClass(e.payment)}">${e.payment.toLocaleUpperCase("es-CL")}</span>
  </div>
- ${e.place?`<div class="compact-line">📍 ${e.place} <button class="compact-link" type="button">Cómo llegar</button></div>`:""}
- ${e.meeting?`<div class="compact-line">🗺️ ${e.meeting}</div>`:""}
+ ${e.place?`<div class="compact-line">📍 ${e.place} <button class="compact-link place-map-link" type="button">Cómo llegar</button></div>`:""}
+ ${e.meeting?`<div class="compact-line">📌 ${e.meeting} <button class="compact-link meeting-map-link" type="button">Cómo llegar</button></div>`:""}
  ${(e.departure||e.test||e.show)?`<div class="compact-line muted">${e.departure?`🚌 ${e.departure}`:""} ${e.test?`🎚️ ${e.test}${e.testEnd?` a ${e.testEnd}`:""}`:""} ${e.show?`🎤 ${e.show}`:""}</div>`:""}
  ${e.status==="Reemplazo"&&e.replacementPerson?`<div class="compact-line">👤 <strong>REEMPLAZA: ${e.replacementPerson}</strong></div>`:""}
  ${e.contact?`<div class="compact-line">👤 ${e.contact}</div>`:""}
@@ -593,8 +610,10 @@ function makeCompactCard(e,editable=true){
    ${editable?`<button class="compact-action edit-btn" type="button">✏️ EDITAR</button>`:""}
    ${editable&&state.view==="calendar"?`<button class="compact-action delete-btn" type="button">🗑️ ELIMINAR</button>`:""}
  </div>`;
- const link=c.querySelector(".compact-link");
- if(link)link.onclick=ev=>{ev.stopPropagation();openMapsChoiceV18(e.place)};
+ const placeLink=c.querySelector(".place-map-link");
+ if(placeLink)placeLink.onclick=ev=>{ev.stopPropagation();openMapsChoiceV18(e.place)};
+ const meetingLink=c.querySelector(".meeting-map-link");
+ if(meetingLink)meetingLink.onclick=ev=>{ev.stopPropagation();openMapsChoiceV18(e.meeting)};
  const call=c.querySelector(".call-btn");
  if(call)call.onclick=ev=>{ev.stopPropagation();window.location.href="tel:+"+phone};
  const wa=c.querySelector(".whatsapp-btn");
@@ -758,24 +777,53 @@ function renderHome(){
  else shown.forEach(e=>c.appendChild(makeCompactCard(e)));
 }
 
-function renderCalendar(){const y=state.calendarYear,m=state.calendarMonth;$("calendarMonth").textContent=new Intl.DateTimeFormat("es-CL",{month:"long",year:"numeric"}).format(new Date(y,m,1));const g=$("calendarGrid");g.innerHTML="";const off=(new Date(y,m,1).getDay()+6)%7;for(let i=0;i<off;i++){const b=document.createElement("button");b.className="day blank";g.appendChild(b)}const days=new Date(y,m+1,0).getDate();for(let d=1;d<=days;d++){const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`,count=state.events.filter(e=>e.date===ds).length,b=document.createElement("button");b.type="button";b.className="day"+(count?" has-event":"")+(ds===todayString()?" today":"")+(state.selectedDate===ds?" selected":"");b.innerHTML=`<span class="day-number">${d}</span>${count?`<span class="day-count">${count}</span>`:""}`;b.onclick=()=>{state.selectedDate=ds;renderCalendar()};g.appendChild(b)}renderSelectedDate();renderCalendarMonthList()}
-function renderCalendarMonthList(){
- const y=state.calendarYear,m=state.calendarMonth,key=`${y}-${String(m+1).padStart(2,"0")}`;
- const a=sortEvents(state.events.filter(e=>e.date.startsWith(key)));
- const title=$("calendarMonthListTitle"),box=$("calendarMonthEvents");
- const monthName=new Intl.DateTimeFormat("es-CL",{month:"long",year:"numeric"}).format(new Date(y,m,1)).toLocaleUpperCase("es-CL");
- title.textContent=`${a.length} ${a.length===1?"PRESTACIÓN":"PRESTACIONES"} · ${monthName}`;
- box.innerHTML="";
- if(!a.length){box.innerHTML='<div class="empty">No hay prestaciones este mes.</div>';return}
- a.forEach(e=>{
-  const card=makeCompactCard(e);
-  card.classList.add("calendar-month-card");
-  box.appendChild(card);
- });
- // Lleva la lista mensual a una zona visible cuando no hay un día seleccionado.
- if(!state.selectedDate && a.length) box.firstElementChild?.classList.add("calendar-first-card");
+function renderCalendar(){
+ const y=state.calendarYear,m=state.calendarMonth;
+ $("calendarMonth").textContent=new Intl.DateTimeFormat("es-CL",{month:"long",year:"numeric"}).format(new Date(y,m,1));
+ const g=$("calendarGrid");g.innerHTML="";
+ const off=(new Date(y,m,1).getDay()+6)%7;
+ for(let i=0;i<off;i++){const b=document.createElement("button");b.className="day blank";g.appendChild(b)}
+ const days=new Date(y,m+1,0).getDate();
+ for(let d=1;d<=days;d++){
+  const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  const count=state.events.filter(e=>e.date===ds).length,b=document.createElement("button");
+  b.type="button";
+  b.className="day"+(count?" has-event":"")+(isChileHoliday(ds)?" holiday":"")+(ds===todayString()?" today":"")+(state.selectedDate===ds?" selected":"");
+  b.innerHTML=`<span class="day-number">${d}</span>${count?`<span class="day-count">${count}</span>`:""}`;
+  b.onclick=()=>{state.selectedDate=ds;renderCalendar()};g.appendChild(b)
+ }
+ renderSelectedDate();
 }
-function renderSelectedDate(){const t=$("selectedDateTitle"),c=$("selectedDateEvents");c.innerHTML="";const add=$("selectedAddBtn");if(!state.selectedDate){t.textContent="Selecciona un día";add.classList.remove("show");return}add.classList.add("show");const a=state.events.filter(e=>e.date===state.selectedDate);t.textContent=`${a.length} ${a.length===1?"prestación":"prestaciones"} · ${formatDateWithWeekday(state.selectedDate)}`;if(!a.length){c.innerHTML='<div class="empty">No hay prestaciones este día.</div>';return}a.forEach(e=>c.appendChild(makeCompactCard(e)))}
+function renderCalendarMonthList(){
+ const section=document.querySelector("#calendarView .calendar-month-list");if(section)section.style.display="none";
+}
+function normalizePrioritiesForDate(ds){
+ const a=state.events.filter(e=>e.date===ds).sort((x,y)=>((Number(x.priority)||999)-(Number(y.priority)||999))||(x.show||x.departure||"99:99").localeCompare(y.show||y.departure||"99:99"));
+ a.forEach((e,i)=>e.priority=i+1);
+}
+function moveCalendarPriority(id,delta){
+ if(!state.selectedDate)return;normalizePrioritiesForDate(state.selectedDate);
+ const a=state.events.filter(e=>e.date===state.selectedDate).sort((x,y)=>x.priority-y.priority);
+ const i=a.findIndex(e=>String(e.id)===String(id)),j=i+delta;if(i<0||j<0||j>=a.length)return;
+ const t=a[i].priority;a[i].priority=a[j].priority;a[j].priority=t;saveEvents();renderCalendar();
+}
+function renderSelectedDate(){
+ const t=$("selectedDateTitle"),c=$("selectedDateEvents");c.innerHTML="";const add=$("selectedAddBtn");
+ if(!state.selectedDate){t.textContent="Selecciona un día";add.classList.remove("show");return}
+ add.classList.add("show");normalizePrioritiesForDate(state.selectedDate);
+ const a=state.events.filter(e=>e.date===state.selectedDate).sort((x,y)=>x.priority-y.priority);
+ t.textContent=`${a.length} ${a.length===1?"prestación":"prestaciones"} · ${formatDateWithWeekday(state.selectedDate)}`;
+ if(!a.length){c.innerHTML='<div class="empty">No hay prestaciones este día.</div>';return}
+ a.forEach((e,i)=>{
+  const card=makeCompactCard(e);
+  const controls=document.createElement("div");controls.className="calendar-priority";
+  controls.innerHTML=`<button class="calendar-priority-btn up" type="button" aria-label="Subir prioridad">↑</button><span class="calendar-priority-label">${i+1}</span><button class="calendar-priority-btn down" type="button" aria-label="Bajar prioridad">↓</button>`;
+  controls.querySelector(".up").disabled=i===0;controls.querySelector(".down").disabled=i===a.length-1;
+  controls.querySelector(".up").onclick=ev=>{ev.stopPropagation();moveCalendarPriority(e.id,-1)};
+  controls.querySelector(".down").onclick=ev=>{ev.stopPropagation();moveCalendarPriority(e.id,1)};
+  card.appendChild(controls);c.appendChild(card)
+ })
+}
 function renderSummary(){const paid=state.events.filter(e=>e.payment==="Pagado"),pending=state.events.filter(e=>e.payment!=="Pagado");$("sumPaid").textContent=paid.length;$("sumPending").textContent=pending.length;$("sumPaidMoney").textContent=formatMoney(paid.reduce((s,e)=>s+e.amount,0));$("sumPendingMoney").textContent=formatMoney(pending.reduce((s,e)=>s+e.amount,0))}
 function openSimpleList(filter,title){state.listFilter=filter;state.listReturnView=(filter==="paid"||filter==="pending")?"summary":"home";$("listTitle").textContent=title;showView("list")}
 function renderSimpleList(){const f=state.listFilter;let a=state.events;if(f==="confirmed")a=a.filter(e=>e.status==="Confirmado");if(f==="replacement")a=a.filter(e=>e.status==="Reemplazo");if(f==="paid")a=a.filter(e=>e.payment==="Pagado");if(f==="pending")a=a.filter(e=>e.payment!=="Pagado");const c=$("simpleList");c.innerHTML="";const detailed=(f==="all"||f==="confirmed"||f==="replacement");sortEvents(a).forEach(e=>{if(detailed){const card=makeCompactCard(e,false);card.style.cursor="pointer";card.onclick=ev=>{if(ev.target.closest(".compact-link")||ev.target.closest("a"))return;openEditForm(e.id,"list")};c.appendChild(card)}else{const b=document.createElement("button");b.type="button";b.className="simple-item";b.innerHTML=`<strong>${e.artist}</strong>${e.place?`<div style="margin:6px 0;color:#d0d0d0;font-size:14px">📍 ${e.place}</div>`:""}<span>📅 ${formatDateWithWeekday(e.date)}</span>`;b.onclick=()=>openEditForm(e.id,"list");c.appendChild(b)}});if(!a.length)c.innerHTML='<div class="empty">No hay prestaciones en esta lista.</div>'}
@@ -783,7 +831,7 @@ function clearForm(){$("eventForm").reset();$("status").value="Confirmado";$("pa
 function openNewForm(date="",ret="home"){state.editingId=null;state.returnView=ret;clearForm();$("formTitle").textContent="Nueva prestación";if(date){$("date").value=date;updateDatePreview()}showView("form")}
 function openEditForm(id,ret="home"){const e=state.events.find(x=>String(x.id)===String(id));if(!e)return;state.editingId=String(e.id);state.returnView=ret;$("formTitle").textContent="Editar prestación";["date","artist","place","meeting","departure","test","testEnd","show","contact","phone","status","payment","replacementPerson","notes"].forEach(k=>$(k).value=e[k]||"");$("amount").value=formatAmountInput(e.amount);$("extra").value=formatAmountInput(e.extra);updateReplacementField();updateDatePreview();showView("form")}
 function updateDatePreview(){const d=parseLocalDate($("date").value);if(!d){$("dateControlDisplay").textContent="FECHA DE PRESTACIÓN";return}const dias=["DOMINGO","LUNES","MARTES","MIÉRCOLES","JUEVES","VIERNES","SÁBADO"],meses=["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEPT","OCT","NOV","DIC"];$("dateControlDisplay").textContent=`${dias[d.getDay()]} ${String(d.getDate()).padStart(2,"0")} ${meses[d.getMonth()]} ${d.getFullYear()}`}function updateReplacementField(){const on=$("status").value==="Reemplazo";$("replacementPersonField").style.display=on?"block":"none";if(!on)$("replacementPerson").value=""}
-function saveForm(ev){ev.preventDefault();const date=normalizeDate($("date").value),artist=upperText($("artist").value);if(!date||!artist){alert("Debes ingresar la fecha y la banda / artista.");return}const r={id:state.editingId||makeId(),date,artist,place:upperText($("place").value),meeting:upperText($("meeting").value),departure:$("departure").value,test:$("test").value,testEnd:$("testEnd").value,show:$("show").value,contact:upperText($("contact").value),phone:cleanText($("phone").value),status:$("status").value,payment:$("payment").value,amount:numericAmount($("amount").value),extra:numericAmount($("extra").value),replacementPerson:$("status").value==="Reemplazo"?upperText($("replacementPerson").value):"",notes:upperText($("notes").value)};const editingId=state.editingId==null?"":String(state.editingId);const i=editingId?state.events.findIndex(e=>String(e.id)===editingId):-1;if(editingId&&i<0){alert("No se encontró la prestación original. No se creó un duplicado.");return}if(i>=0)state.events[i]=r;else state.events.push(r);saveEvents();state.editingId=null;renderAll();if(state.returnView==="detail"){state.detailId=r.id;showView("detail")}else showView(state.returnView==="list"?"list":state.returnView||"home")}
+function saveForm(ev){ev.preventDefault();const date=normalizeDate($("date").value),artist=upperText($("artist").value);if(!date||!artist){alert("Debes ingresar la fecha y la banda / artista.");return}const r={id:state.editingId||makeId(),date,artist,place:upperText($("place").value),meeting:upperText($("meeting").value),departure:$("departure").value,test:$("test").value,testEnd:$("testEnd").value,show:$("show").value,contact:upperText($("contact").value),phone:cleanText($("phone").value),status:$("status").value,payment:$("payment").value,amount:numericAmount($("amount").value),extra:numericAmount($("extra").value),replacementPerson:$("status").value==="Reemplazo"?upperText($("replacementPerson").value):"",notes:upperText($("notes").value),priority:(()=>{const old=state.events.find(x=>String(x.id)===String(state.editingId));return old?old.priority:999})()};const editingId=state.editingId==null?"":String(state.editingId);const i=editingId?state.events.findIndex(e=>String(e.id)===editingId):-1;if(editingId&&i<0){alert("No se encontró la prestación original. No se creó un duplicado.");return}if(i>=0)state.events[i]=r;else state.events.push(r);saveEvents();state.editingId=null;renderAll();if(state.returnView==="detail"){state.detailId=r.id;showView("detail")}else showView(state.returnView==="list"?"list":state.returnView||"home")}
 function exportBackup(){const blob=new Blob([JSON.stringify({app:"KICHAN AGENDA",version:3,fecha:new Date().toISOString(),events:state.events},null,2)],{type:"application/json"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="KICHAN-AGENDA-RESPALDO.json";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 function importBackup(file){if(!file)return;const r=new FileReader();r.onload=()=>{try{const p=JSON.parse(r.result),src=Array.isArray(p)?p:p.events;if(!Array.isArray(src))throw 0;const a=src.map(normalizeEvent).filter(Boolean);if(!a.length)throw 0;if(confirm(`El respaldo contiene ${a.length} prestaciones.\n\n¿Reemplazar la agenda actual?`)){state.events=sortEvents(a);saveEvents();renderAll();showView("home");alert("Respaldo importado correctamente.")}}catch{alert("No se pudo importar el respaldo.")}$("importFile").value=""};r.readAsText(file)}
 function clearAgenda(){if(confirm("¿Seguro que quieres dejar la agenda en 0?\n\nEsta acción borrará todas las prestaciones de este dispositivo.")){state.events=[];saveEvents();renderAll();showView("home")}}
