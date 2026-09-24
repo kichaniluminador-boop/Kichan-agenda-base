@@ -389,6 +389,40 @@ body::after{content:"";position:fixed;z-index:0;inset:0;pointer-events:none;back
 /* El resto de vistas conserva el mismo escenario, sin repetir la pantalla Agenda. */
 #calendarView,#summaryView,#settingsView,#listView,#detailView,#formView{position:relative}
 </style>
+
+<style>
+/* V35 CORRECCIONES APROBADAS: barra fija + detalle de flecha */
+.bottom-nav{
+  position:fixed!important;
+  z-index:10000!important;
+  left:50%!important;
+  bottom:calc(1px + env(safe-area-inset-bottom))!important;
+  transform:translateX(-50%)!important;
+}
+.app{padding-bottom:calc(125px + env(safe-area-inset-bottom))!important}
+#detailView{padding-bottom:12px}
+.detail-card{padding:16px!important}
+.detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.detail-head-copy{min-width:0}
+.detail-status{flex:0 0 auto;border:1px solid #35e86a;border-radius:999px;padding:6px 10px;color:#35e86a;background:#071108;font-size:10px;font-weight:950;letter-spacing:.3px}
+.detail-location-pair{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid #333;border-bottom:1px solid #333;margin-top:10px}
+.detail-location-cell{min-width:0;display:flex;align-items:center;gap:8px;padding:13px 9px;font-size:12px;font-weight:900;line-height:1.2}
+.detail-location-cell+ .detail-location-cell{border-left:1px solid #555}
+.detail-location-icon{font-size:22px;line-height:1;flex:0 0 auto}
+.detail-contact-row{display:grid;grid-template-columns:minmax(0,1fr) 50px 50px;align-items:center;gap:8px;padding:12px 4px;border-bottom:1px solid #333}
+.detail-contact-name{display:flex;align-items:center;gap:9px;min-width:0;font-size:14px;font-weight:900}
+.detail-contact-icon{font-size:24px}
+.detail-contact-action{height:44px;border:1px solid #56616d;border-radius:13px;background:#1d2329;color:#fff;font-size:21px;font-weight:900}
+.detail-contact-action.wa{color:#31d158}
+.detail-notes-v35{padding:11px 3px;border-bottom:1px solid #333;color:#ddd;font-size:13px;line-height:1.35}
+.detail-notes-v35 strong{display:block;color:#fff;margin-bottom:4px}
+.detail-actions-v35{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:13px}
+.detail-actions-v35 .detail-btn{min-height:48px;font-size:11px}
+.detail-actions-v35 .detail-btn.danger{grid-column:auto;color:#ff4545;border-color:#ff4545;background:#160808}
+.detail-actions-v35 .detail-btn.share{color:var(--gold);border-color:var(--gold)}
+.detail-test-range{white-space:nowrap}
+@media(max-width:360px){.detail-location-cell{font-size:10px;padding-left:6px;padding-right:6px}.detail-actions-v35 .detail-btn{font-size:10px}}
+</style>
 </head>
 <body>
 <div id="licenseGate" class="license-gate">
@@ -732,36 +766,39 @@ function openDetail(id,ret="home"){state.detailId=id;state.detailReturnView=ret;
 function renderDetail(){
  const e=state.events.find(x=>String(x.id)===String(state.detailId)),c=$("detailContent");
  if(!e){c.innerHTML='<div class="empty">No se encontró la prestación.</div>';return}
+ const testLabel=e.test?(e.testEnd?`${e.test} a ${e.testEnd}`:e.test):"—";
+ const hasPhone=!!cleanText(e.phone);
  c.innerHTML=`<article class="detail-card">
-  <div class="detail-date">${formatDateWithWeekday(e.date)}</div>
-  <h2 class="detail-title">${e.artist}</h2>
-  <div class="next-badges"><span class="next-badge">${e.status.toLocaleUpperCase("es-CL")}</span><span class="next-badge">${e.payment.toLocaleUpperCase("es-CL")}</span></div>
+  <div class="detail-head">
+   <div class="detail-head-copy"><div class="detail-date">${formatDateWithWeekday(e.date)}</div><h2 class="detail-title">${e.artist}</h2></div>
+   <div class="detail-status">${e.status.toLocaleUpperCase("es-CL")}</div>
+  </div>
   <div class="detail-times">
    <div class="detail-time"><strong>${e.departure||"—"}</strong>🚌 Salida</div>
-   <div class="detail-time"><strong>${e.test||"—"}</strong>🎚️ Prueba</div>
+   <div class="detail-time"><strong class="detail-test-range">${testLabel}</strong>🎚️ Prueba</div>
    <div class="detail-time"><strong>${e.show||"—"}</strong>🎤 Show</div>
   </div>
-  ${e.place?`<div class="detail-row detail-place"><span class="detail-place-icon">📍</span><span class="detail-place-value">${e.place}</span></div>`:""}
-  ${e.meeting?`<div class="detail-row detail-meeting"><span class="detail-meeting-icon">🗺️</span><span class="detail-meeting-value">${e.meeting}</span></div>`:""}
-  ${e.status==="Reemplazo"&&e.replacementPerson?`<div class="detail-row">👤 <strong>Reemplaza</strong>${e.replacementPerson}</div>`:""}
-  ${e.contact?`<div class="detail-row">👤 <strong>Contacto</strong>${e.contact}</div>`:""}
-  ${e.phone?`<div class="detail-row">📱 <strong>Teléfono</strong>${e.phone}</div>`:""}
-  ${e.notes?`<div class="detail-row">📝 <strong>Notas</strong>${e.notes}</div>`:""}
-  <div class="detail-actions">
-   ${e.place?`<button id="detailMap" class="detail-btn" type="button">📍 CÓMO LLEGAR</button>`:""}
-   ${e.phone?`<button id="detailContact" class="detail-btn" type="button">📱 CONTACTO</button>`:""}
-   <button id="detailShare" class="detail-btn" type="button">↗ COMPARTIR</button>
-   <button id="detailEdit" class="detail-btn" type="button">✏️ EDITAR</button>
+  ${(e.place||e.meeting)?`<div class="detail-location-pair">
+    <div class="detail-location-cell"><span class="detail-location-icon">📍</span><span>${e.place||"LOCALIDAD"}</span></div>
+    <div class="detail-location-cell"><span class="detail-location-icon">📌</span><span>${e.meeting||"PUNTO DE ENCUENTRO"}</span></div>
+  </div>`:""}
+  ${(e.contact||hasPhone)?`<div class="detail-contact-row">
+    <div class="detail-contact-name"><span class="detail-contact-icon">👤</span><span>${e.contact||"CONTACTO"}</span></div>
+    ${hasPhone?`<button id="detailCallV35" class="detail-contact-action" type="button" aria-label="Llamar">☎</button><button id="detailWaV35" class="detail-contact-action wa" type="button" aria-label="WhatsApp">◉</button>`:'<span></span><span></span>'}
+  </div>`:""}
+  ${e.status==="Reemplazo"&&e.replacementPerson?`<div class="detail-notes-v35"><strong>👤 Reemplaza</strong>${e.replacementPerson}</div>`:""}
+  ${e.notes?`<div class="detail-notes-v35"><strong>📝 Notas</strong>${e.notes}</div>`:""}
+  <div class="detail-actions-v35">
    <button id="detailDelete" class="detail-btn danger" type="button">🗑️ ELIMINAR</button>
-   <button id="detailCancel" class="detail-btn" type="button">CANCELAR</button>
+   <button id="detailEdit" class="detail-btn" type="button">✏️ EDITAR</button>
+   <button id="detailShare" class="detail-btn share" type="button">↗ COMPARTIR</button>
   </div>
  </article>`;
- if($("detailMap"))$("detailMap").onclick=()=>openMapsChoiceV18(e.place);
- if($("detailContact"))$("detailContact").onclick=()=>openContactChoiceV18(e.phone);
+ if($("detailCallV35"))$("detailCallV35").onclick=()=>{const d=phoneDigitsV18(e.phone);if(d)window.location.href="tel:+"+d};
+ if($("detailWaV35"))$("detailWaV35").onclick=()=>{const d=phoneDigitsV18(e.phone);if(d)window.location.href="https://wa.me/"+d};
  $("detailShare").onclick=()=>shareEventV18(e);
  $("detailEdit").onclick=()=>openEditForm(e.id,"detail");
  $("detailDelete").onclick=()=>deleteEventFromDetail(e.id);
- $("detailCancel").onclick=()=>showView(state.detailReturnView||"home");
 }
 function deleteEventFromDetail(id){
  const e=state.events.find(x=>String(x.id)===String(id));
