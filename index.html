@@ -479,6 +479,16 @@ body:has(#actionSheet.show){overflow:hidden!important}
 #summaryView .finance-grid .summary-label{font-size:9px;margin-top:5px}
 #summaryView .finance-grid .summary-hint{font-size:8px;margin-top:4px}
 </style>
+<style id="finance-overdue-extras-v1">
+#summaryView .finance-overdue{margin:10px 0 14px;padding:12px 14px;border:1px solid var(--gold);border-radius:18px;background:rgba(0,0,0,.42);text-align:center;cursor:pointer}
+#summaryView .finance-overdue-title{font-size:12px;font-weight:900;letter-spacing:1px;color:var(--gold);text-transform:uppercase}
+#summaryView .finance-overdue-main{display:flex;justify-content:center;gap:9px;align-items:baseline;margin-top:5px;font-weight:900}
+#summaryView .finance-overdue-count{font-size:22px;color:var(--gold)} #summaryView .finance-overdue-money{font-size:20px;color:var(--gold)}
+#summaryView .finance-overdue-oldest{font-size:9px;color:#ddd;margin-top:4px;text-transform:uppercase}
+#summaryView .finance-extras{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+#summaryView .finance-extra-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px 7px;text-align:center}
+#summaryView .finance-extra-card .summary-number{font-size:19px}
+</style>
 </head>
 <body>
 <div id="licenseGate" class="license-gate">
@@ -541,6 +551,12 @@ body:has(#actionSheet.show){overflow:hidden!important}
 </section>
 <section id="summaryView" class="view">
   <div class="brand">KICHAN ILUMINADOR</div><h1 class="page-title">Finanzas</h1>
+  <div id="overdueCard" class="finance-overdue clickable">
+    <div class="finance-overdue-title">⚠ Pendientes de cobro</div>
+    <div class="finance-overdue-main"><span id="overdueCount" class="finance-overdue-count">0</span><span>·</span><span id="overdueMoney" class="finance-overdue-money">$0</span></div>
+    <div id="overdueOldest" class="finance-overdue-oldest">SIN DEUDAS ATRASADAS</div>
+    <div class="summary-hint">VER LISTA</div>
+  </div>
   <section class="finance-section">
     <div id="financeMonthTitle" class="finance-section-title">MES EN CURSO</div>
     <div class="summary-grid finance-grid">
@@ -549,6 +565,7 @@ body:has(#actionSheet.show){overflow:hidden!important}
       <div class="summary-card"><div id="monthSumPaidMoney" class="summary-number money-number">$0</div><div class="summary-label">Total pagado</div></div>
       <div class="summary-card"><div id="monthSumPendingMoney" class="summary-number money-number">$0</div><div class="summary-label">Por cobrar</div></div>
     </div>
+    <div class="finance-extras"><div class="finance-extra-card"><div id="monthExtras" class="summary-number">$0</div><div class="summary-label">Extras del mes</div></div><div class="finance-extra-card"><div id="generalExtras" class="summary-number">$0</div><div class="summary-label">Extras generales</div></div></div>
   </section>
   <section class="finance-section finance-general">
     <div class="finance-section-title">FINANZAS GENERALES</div>
@@ -1049,9 +1066,17 @@ function renderSummary(){
  $("monthSumPaidMoney").textContent=formatMoney(monthPaid.reduce((s,e)=>s+e.amount,0));$("monthSumPendingMoney").textContent=formatMoney(monthPending.reduce((s,e)=>s+e.amount,0));
  $("sumPaid").textContent=paid.length;$("sumPending").textContent=pending.length;
  $("sumPaidMoney").textContent=formatMoney(paid.reduce((s,e)=>s+e.amount,0));$("sumPendingMoney").textContent=formatMoney(pending.reduce((s,e)=>s+e.amount,0));
+ const today=todayString();
+ const overdue=state.events.filter(e=>e.payment!=="Pagado"&&e.date&&e.date<today);
+ const overdueTotal=overdue.reduce((s,e)=>s+Number(e.amount||0)+Number(e.extra||0),0);
+ $("overdueCount").textContent=overdue.length;$("overdueMoney").textContent=formatMoney(overdueTotal);
+ const oldest=overdue.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)))[0];
+ $("overdueOldest").textContent=oldest?`MÁS ANTIGUA: ${formatDateWithWeekday(oldest.date)}`:"SIN DEUDAS ATRASADAS";
+ $("monthExtras").textContent=formatMoney(monthEvents.reduce((s,e)=>s+Number(e.extra||0),0));
+ $("generalExtras").textContent=formatMoney(state.events.reduce((s,e)=>s+Number(e.extra||0),0));
 }
-function openSimpleList(filter,title){state.listFilter=filter;state.listReturnView=(["paid","pending","month-paid","month-pending"].includes(filter))?"summary":"home";$("listTitle").textContent=title;showView("list")}
-function renderSimpleList(){const f=state.listFilter;let a=state.events;if(f==="confirmed")a=a.filter(e=>e.status==="Confirmado");if(f==="replacement")a=a.filter(e=>e.status==="Va Remplazo");if(f==="toconfirm")a=a.filter(e=>e.status==="Por confirmar");if(f==="cancelled")a=a.filter(e=>e.status==="Cancelado");if(f==="paid")a=a.filter(e=>e.payment==="Pagado");if(f==="pending")a=a.filter(e=>e.payment!=="Pagado");if(f==="month-paid"||f==="month-pending"){const n=new Date(),p=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-`;a=a.filter(e=>String(e.date||"").startsWith(p)&&(f==="month-paid"?e.payment==="Pagado":e.payment!=="Pagado"));}const c=$("simpleList");c.innerHTML="";const statusList=["all","confirmed","replacement","toconfirm","cancelled"].includes(f);sortEvents(a).forEach(e=>{if(statusList){const card=makeCompactCard(e,false);card.style.cursor="default";card.querySelectorAll("button,a").forEach(x=>{x.style.pointerEvents="none";x.setAttribute("tabindex","-1")});c.appendChild(card)}else{const b=document.createElement("div");b.className="simple-item";b.innerHTML=`<strong>${e.artist}</strong>${e.place?`<div style="margin:6px 0;color:#d0d0d0;font-size:14px">📍 ${e.place}</div>`:""}<span>📅 ${formatDateWithWeekday(e.date)}</span>`;c.appendChild(b)}});if(!a.length)c.innerHTML='<div class="empty">No hay prestaciones en esta lista.</div>'}
+function openSimpleList(filter,title){state.listFilter=filter;state.listReturnView=(["paid","pending","month-paid","month-pending","overdue"].includes(filter))?"summary":"home";$("listTitle").textContent=title;showView("list")}
+function renderSimpleList(){const f=state.listFilter;let a=state.events;if(f==="confirmed")a=a.filter(e=>e.status==="Confirmado");if(f==="replacement")a=a.filter(e=>e.status==="Va Remplazo");if(f==="toconfirm")a=a.filter(e=>e.status==="Por confirmar");if(f==="cancelled")a=a.filter(e=>e.status==="Cancelado");if(f==="paid")a=a.filter(e=>e.payment==="Pagado");if(f==="pending")a=a.filter(e=>e.payment!=="Pagado");if(f==="overdue"){const t=todayString();a=a.filter(e=>e.payment!=="Pagado"&&e.date&&e.date<t);}if(f==="month-paid"||f==="month-pending"){const n=new Date(),p=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-`;a=a.filter(e=>String(e.date||"").startsWith(p)&&(f==="month-paid"?e.payment==="Pagado":e.payment!=="Pagado"));}const c=$("simpleList");c.innerHTML="";const statusList=["all","confirmed","replacement","toconfirm","cancelled"].includes(f);sortEvents(a).forEach(e=>{if(statusList){const card=makeCompactCard(e,false);card.style.cursor="default";card.querySelectorAll("button,a").forEach(x=>{x.style.pointerEvents="none";x.setAttribute("tabindex","-1")});c.appendChild(card)}else{const b=document.createElement("div");b.className="simple-item";b.innerHTML=`<strong>${e.artist}</strong>${e.place?`<div style="margin:6px 0;color:#d0d0d0;font-size:14px">📍 ${e.place}</div>`:""}<span>📅 ${formatDateWithWeekday(e.date)}</span>`;c.appendChild(b)}});if(!a.length)c.innerHTML='<div class="empty">No hay prestaciones en esta lista.</div>'}
 function clearForm(){$("eventForm").reset();$("status").value="Confirmado";$("payment").value="Pendiente";$("dateControlDisplay").textContent="FECHA DE PRESTACIÓN";$("amount").value="";$("extra").value="";updateReplacementField()}
 function openNewForm(date="",ret="home"){state.editingId=null;state.returnView=ret;clearForm();$("formTitle").textContent="Nueva prestación";if(date){$("date").value=date;updateDatePreview()}showView("form")}
 function openEditForm(id,ret="home"){const e=state.events.find(x=>String(x.id)===String(id));if(!e)return;state.editingId=String(e.id);state.returnView=ret;$("formTitle").textContent="Editar prestación";["date","artist","place","placeAddress","meeting","meetingAddress","departure","test","testEnd","show","contact","phone","status","payment","replacementPerson","notes"].forEach(k=>$(k).value=e[k]||"");$("amount").value=formatAmountInput(e.amount);$("extra").value=formatAmountInput(e.extra);updateReplacementField();updateDatePreview();showView("form")}
@@ -1113,7 +1138,7 @@ $("date").onchange=updateDatePreview;$("status").onchange=updateReplacementField
 $("amount").oninput=()=>{const d=$("amount").value.replace(/\D/g,"");$("amount").value=d?new Intl.NumberFormat("es-CL").format(+d):""};$("extra").oninput=()=>{const d=$("extra").value.replace(/\D/g,"");$("extra").value=d?new Intl.NumberFormat("es-CL").format(+d):""};
 $("eventForm").onsubmit=saveForm;if($("saveFormBtn"))$("saveFormBtn").onclick=(ev)=>saveForm(ev);$("cancelFormBtn").onclick=()=>{state.editingId=null;showView(state.returnView||"home")};
 $("totalCard").onclick=()=>openSimpleList("all","Total prestaciones");$("confirmedCard").onclick=()=>openSimpleList("confirmed","Confirmadas");$("replacementCard").onclick=()=>openSimpleList("replacement","Reemplazos");$("toConfirmCard").onclick=()=>openSimpleList("toconfirm","Por confirmar");$("cancelledCard").onclick=()=>openSimpleList("cancelled","Canceladas");
-$("paidCard").onclick=()=>openSimpleList("paid","Pagadas · General");$("pendingCard").onclick=()=>openSimpleList("pending","Pendientes · General");$("monthPaidCard").onclick=()=>openSimpleList("month-paid","Pagadas · Mes en curso");$("monthPendingCard").onclick=()=>openSimpleList("month-pending","Pendientes · Mes en curso");
+$("overdueCard").onclick=()=>openSimpleList("overdue","Pendientes de cobro");$("paidCard").onclick=()=>openSimpleList("paid","Pagadas · General");$("pendingCard").onclick=()=>openSimpleList("pending","Pendientes · General");$("monthPaidCard").onclick=()=>openSimpleList("month-paid","Pagadas · Mes en curso");$("monthPendingCard").onclick=()=>openSimpleList("month-pending","Pendientes · Mes en curso");
 $("exportBtn").onclick=exportBackup;$("importBtn").onclick=()=>$("importFile").click();$("importFile").onchange=()=>importBackup($("importFile").files[0]);$("clearAgendaBtn").onclick=clearAgenda;if($("changeLicenseBtn"))$("changeLicenseBtn").onclick=cambiarLicencia;
 async function validarLicencia(codigo){
   const code=upperText(codigo);
