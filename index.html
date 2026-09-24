@@ -1427,3 +1427,60 @@ renderAll();
  if(state.view==='detail')renderDetail();
 })();
 </script>
+
+<!-- v50 · selector de prestación Próximo para días con varias prestaciones -->
+<style id="next-day-selector-v50">
+#homeView #nextHeroCard{position:relative!important}
+#homeView .next-day-counter-v50{position:absolute;right:14px;top:92px;z-index:12;min-width:42px;height:27px;padding:0 9px;border-radius:14px;border:1px solid currentColor;background:rgba(7,16,24,.88);color:var(--accent,#35c9ff);font-size:11px;font-weight:900;letter-spacing:.4px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 8px color-mix(in srgb,currentColor 28%,transparent)}
+#calendarView .set-next-v50{width:100%;margin:8px 0 2px;padding:10px 12px;border-radius:13px;border:1px solid var(--accent,#35c9ff);background:rgba(8,18,27,.78);color:var(--accent,#35c9ff);font-size:11px;font-weight:900;letter-spacing:.35px;text-transform:uppercase}
+#calendarView .set-next-v50.is-next{background:color-mix(in srgb,var(--accent,#35c9ff) 14%,rgba(8,18,27,.9));box-shadow:0 0 10px color-mix(in srgb,var(--accent,#35c9ff) 25%,transparent)}
+</style>
+<script id="next-day-selector-v50-js">
+(()=>{
+ const getUpcoming=()=>sortEvents((state.events||[]).filter(e=>e.date>=todayString()));
+ const getNext=()=>getUpcoming()[0]||null;
+ const goDay=ds=>{
+   const d=parseLocalDate(ds);if(!d)return;
+   state.calendarYear=d.getFullYear();state.calendarMonth=d.getMonth();state.selectedDate=ds;showView('calendar');
+   setTimeout(()=>document.getElementById('selectedDateEvents')?.scrollIntoView({behavior:'smooth',block:'start'}),80);
+ };
+ const decorateHero=()=>{
+   const card=document.getElementById('nextHeroCard');if(!card)return;
+   card.querySelector('.next-day-counter-v50')?.remove();
+   const n=getNext();if(!n)return;
+   const same=sortEvents((state.events||[]).filter(e=>e.date===n.date));
+   if(same.length<2)return;
+   const pos=Math.max(0,same.findIndex(e=>String(e.id)===String(n.id)))+1;
+   const b=document.createElement('button');b.type='button';b.className='next-day-counter-v50';b.textContent=`${pos}/${same.length}`;b.setAttribute('aria-label',`${pos} de ${same.length} prestaciones este día`);
+   b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();goDay(n.date)};
+   card.appendChild(b);
+ };
+ const oldHero=renderNextHero;
+ renderNextHero=function(){oldHero();decorateHero()};
+ const decorateCalendar=()=>{
+   if(!state.selectedDate)return;
+   const cards=[...document.querySelectorAll('#selectedDateEvents .compact-card[data-event-id]')];
+   const day=sortEvents((state.events||[]).filter(e=>e.date===state.selectedDate));
+   if(day.length<2)return;
+   const current=getNext();
+   cards.forEach(card=>{
+     card.querySelector('.set-next-v50')?.remove();
+     const id=card.dataset.eventId,e=state.events.find(x=>String(x.id)===String(id));if(!e)return;
+     const isNext=current&&String(current.id)===String(id);
+     const b=document.createElement('button');b.type='button';b.className='set-next-v50'+(isNext?' is-next':'');b.textContent=isNext?'★ EN PRÓXIMO':'☆ DEJAR EN PRÓXIMO';
+     b.onclick=ev=>{
+       ev.preventDefault();ev.stopPropagation();
+       const same=state.events.filter(x=>x.date===e.date);
+       same.forEach(x=>x.priority=(Number(x.priority)||999)+1);
+       e.priority=0;
+       saveEvents();renderAll();state.selectedDate=e.date;renderCalendar();
+     };
+     card.appendChild(b);
+   });
+ };
+ const oldSelected=renderSelectedDate;
+ renderSelectedDate=function(){oldSelected();decorateCalendar()};
+ // Re-render para aplicar el indicador inmediatamente al cargar esta versión.
+ if(state.view==='home')renderHome();else if(state.view==='calendar')renderCalendar();
+})();
+</script>
