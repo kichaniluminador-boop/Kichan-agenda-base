@@ -563,7 +563,7 @@ body:has(#actionSheet.show){overflow:hidden!important}
     <div class="status-row"><div class="field compact-field"><label for="status">✅ ESTADO</label><select id="status" class="control"><option value="Confirmado">Confirmado</option><option value="Reemplazo">Reemplazo</option><option value="Pendiente">Pendiente</option><option value="Cancelado">Cancelado</option></select></div><div class="field compact-field"><label for="payment">💰 PAGO</label><select id="payment" class="control"><option value="Pagado">Pagado</option><option value="Pendiente">Pendiente</option></select></div></div><div id="replacementPersonField" class="field" style="display:none"><label for="replacementPerson">👤 REEMPLAZA</label><input id="replacementPerson" class="control" type="text" placeholder="REEMPLAZA" autocomplete="off"></div>
     <div class="money-row"><div class="field compact-field"><label for="amount">💵 MONTO ACORDADO</label><div class="money-wrap"><input id="amount" class="control" type="text" inputmode="numeric" placeholder="0"></div></div><div class="field compact-field"><label for="extra">💰 EXTRA</label><div class="money-wrap"><input id="extra" class="control" type="text" inputmode="numeric" placeholder="0"></div></div></div>
     <div class="field"><label for="notes">📝 NOTAS</label><textarea id="notes" class="control" placeholder="NOTAS"></textarea></div>
-    <div class="form-actions"><button id="cancelFormBtn" class="action" type="button">CANCELAR</button><button class="action save" type="submit">💾 GUARDAR</button></div>
+    <div class="form-actions"><button id="cancelFormBtn" class="action" type="button">CANCELAR</button><button id="saveFormBtn" class="action save" type="button">💾 GUARDAR</button></div>
   </form>
 </section>
 </main>
@@ -1035,7 +1035,7 @@ $("nextMonth").onclick=()=>{if(++state.calendarMonth>11){state.calendarMonth=0;s
 $("date").onchange=updateDatePreview;$("status").onchange=updateReplacementField;
 ["artist","place","meeting","contact","replacementPerson","notes"].forEach(id=>$(id).addEventListener("input",e=>{const s=e.target.selectionStart;e.target.value=e.target.value.toLocaleUpperCase("es-CL");try{e.target.setSelectionRange(s,s)}catch{}}));
 $("amount").oninput=()=>{const d=$("amount").value.replace(/\D/g,"");$("amount").value=d?new Intl.NumberFormat("es-CL").format(+d):""};$("extra").oninput=()=>{const d=$("extra").value.replace(/\D/g,"");$("extra").value=d?new Intl.NumberFormat("es-CL").format(+d):""};
-$("eventForm").onsubmit=saveForm;$("cancelFormBtn").onclick=()=>{state.editingId=null;showView(state.returnView||"home")};
+$("eventForm").onsubmit=saveForm;if($("saveFormBtn"))$("saveFormBtn").onclick=(ev)=>saveForm(ev);$("cancelFormBtn").onclick=()=>{state.editingId=null;showView(state.returnView||"home")};
 $("totalCard").onclick=()=>openSimpleList("all","Prestaciones");$("confirmedCard").onclick=()=>openSimpleList("confirmed","Confirmadas");$("replacementCard").onclick=()=>openSimpleList("replacement","Reemplazos");$("nextCard").onclick=()=>{const n=sortEvents(state.events.filter(e=>e.date>=todayString()))[0];if(n)openDetail(n.id,"home")};
 $("paidCard").onclick=()=>openSimpleList("paid","Pagadas");$("pendingCard").onclick=()=>openSimpleList("pending","Pendientes");
 $("exportBtn").onclick=exportBackup;$("importBtn").onclick=()=>$("importFile").click();$("importFile").onchange=()=>importBackup($("importFile").files[0]);$("clearAgendaBtn").onclick=clearAgenda;if($("changeLicenseBtn"))$("changeLicenseBtn").onclick=cambiarLicencia;
