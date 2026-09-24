@@ -302,6 +302,12 @@
 
 /* Control de licencia Supabase */
 .license-gate{position:fixed;inset:0;z-index:99999;background:#050505;display:none;align-items:center;justify-content:center;padding:24px}.license-box{width:100%;max-width:390px;text-align:center}.license-brand{color:var(--gold2);font-size:13px;font-weight:800;letter-spacing:5px;margin-bottom:28px}.license-title{font-size:38px;line-height:1;margin:0 0 12px}.license-sub{color:var(--muted);font-size:15px;line-height:1.45;margin:0 0 24px}.license-input{width:100%;background:var(--field);border:1px solid var(--line);border-radius:14px;color:var(--text);padding:16px;text-align:center;text-transform:uppercase;font-weight:800;letter-spacing:1px;outline:none}.license-input:focus{border-color:var(--gold)}.license-btn{width:100%;margin-top:12px;border:0;border-radius:14px;padding:16px;background:var(--gold);color:#111;font-weight:900}.license-btn:disabled{opacity:.55}.license-msg{min-height:22px;margin-top:14px;color:var(--muted);font-size:14px}.license-msg.error{color:var(--danger)}
+
+/* V30: PERSONALIZACIÓN DE COLEGAS */
+.theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+.theme-choice{height:46px;border:2px solid #444;border-radius:14px;background:var(--theme-choice,#efbd37)}
+.theme-choice.active{border-color:#fff;box-shadow:0 0 0 2px #111,0 0 0 4px var(--theme-choice,#efbd37)}
+.theme-hint{text-align:center;color:var(--muted);font-size:11px;line-height:1.35;margin:10px 4px 0}
 </style>
 </head>
 <body>
@@ -375,6 +381,12 @@
   <section class="backup-section" style="margin-top:18px"><h2 class="backup-title">Mi Agenda</h2><div class="tools">
     <div class="field"><label for="profileName">NOMBRE / MARCA</label><input id="profileName" class="control" type="text" placeholder="MI NOMBRE"></div>
     <div class="field"><label for="profileSubtitle">DESCRIPCIÓN</label><input id="profileSubtitle" class="control" type="text" placeholder="DESCRIPCIÓN (OPCIONAL)"></div>
+    <div class="field"><label>COLOR DE MI AGENDA</label><div id="themeChoices" class="theme-grid">
+      <button class="theme-choice" type="button" data-theme="gold" style="--theme-choice:#efbd37" aria-label="Dorado"></button>
+      <button class="theme-choice" type="button" data-theme="blue" style="--theme-choice:#4da3ff" aria-label="Azul"></button>
+      <button class="theme-choice" type="button" data-theme="green" style="--theme-choice:#35c66b" aria-label="Verde"></button>
+      <button class="theme-choice" type="button" data-theme="purple" style="--theme-choice:#b07cff" aria-label="Morado"></button>
+    </div><div class="theme-hint">Elige el color principal de tu agenda.</div></div>
     <button id="saveProfileBtn" class="tool-btn" type="button">💾 GUARDAR MI AGENDA</button>
   </div></section>
   <section class="backup-section"><h2 class="backup-title">Respaldo de agenda</h2><div class="tools"><div class="tool-buttons">
@@ -445,9 +457,12 @@ const state={events:[],view:"home",editingId:null,returnView:"home",selectedDate
 const $=id=>document.getElementById(id);
 const cleanText=v=>String(v??"").trim();
 const upperText=v=>cleanText(v).toLocaleUpperCase("es-CL");
-function loadProfile(){try{const p=JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");return{name:upperText(p.name)||"MI AGENDA",subtitle:upperText(p.subtitle)}}catch{return{name:"MI AGENDA",subtitle:""}}}
-function applyProfile(){const p=loadProfile();document.querySelectorAll(".brand").forEach(b=>{b.dataset.name=p.name;b.dataset.subtitle=p.subtitle});if($("profileName"))$("profileName").value=p.name;if($("profileSubtitle"))$("profileSubtitle").value=p.subtitle}
-function saveProfile(){const p={name:upperText($("profileName")?.value)||"MI AGENDA",subtitle:upperText($("profileSubtitle")?.value)};localStorage.setItem(PROFILE_KEY,JSON.stringify(p));applyProfile();programarGuardadoNube();alert("Tu agenda quedó personalizada.")}
+const THEMES={gold:{gold:"#efbd37",gold2:"#b88a25"},blue:{gold:"#4da3ff",gold2:"#2875bd"},green:{gold:"#35c66b",gold2:"#218947"},purple:{gold:"#b07cff",gold2:"#7548aa"}};
+let selectedTheme="gold";
+function loadProfile(){try{const p=JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");return{name:upperText(p.name)||"MI AGENDA",subtitle:upperText(p.subtitle),theme:THEMES[p.theme]?p.theme:"gold"}}catch{return{name:"MI AGENDA",subtitle:"",theme:"gold"}}}
+function applyTheme(theme){const t=THEMES[theme]||THEMES.gold;selectedTheme=THEMES[theme]?theme:"gold";document.documentElement.style.setProperty("--gold",t.gold);document.documentElement.style.setProperty("--gold2",t.gold2);document.querySelectorAll(".theme-choice").forEach(b=>b.classList.toggle("active",b.dataset.theme===selectedTheme))}
+function applyProfile(){const p=loadProfile();document.querySelectorAll(".brand").forEach(b=>{b.dataset.name=p.name;b.dataset.subtitle=p.subtitle});if($("profileName"))$("profileName").value=p.name;if($("profileSubtitle"))$("profileSubtitle").value=p.subtitle;applyTheme(p.theme)}
+function saveProfile(){const p={name:upperText($("profileName")?.value)||"MI AGENDA",subtitle:upperText($("profileSubtitle")?.value),theme:selectedTheme};localStorage.setItem(PROFILE_KEY,JSON.stringify(p));applyProfile();programarGuardadoNube();alert("Tu agenda quedó personalizada.")}
 
 function safeClass(v){
  return cleanText(v).toLocaleLowerCase("es-CL")
@@ -513,7 +528,7 @@ async function sincronizarAgendaAlActivar(licencia){
   state.events=sortEvents(remoteEvents);
   localStorage.setItem(STORAGE_KEY,JSON.stringify(state.events));
   if(remoto.profile&&typeof remoto.profile==="object"){
-   const rp={name:upperText(remoto.profile.name)||"MI AGENDA",subtitle:upperText(remoto.profile.subtitle)};
+   const rp={name:upperText(remoto.profile.name)||"MI AGENDA",subtitle:upperText(remoto.profile.subtitle),theme:THEMES[remoto.profile.theme]?remoto.profile.theme:"gold"};
    localStorage.setItem(PROFILE_KEY,JSON.stringify(rp));
    applyProfile();
   }
@@ -833,6 +848,7 @@ function iniciarLicencia(){
   const guardada=localStorage.getItem(LICENSE_STORAGE_KEY)||"";
   if(guardada){input.value=guardada;activarLicencia(guardada,true)}else{if($("licenseGate"))$("licenseGate").style.display="flex";setTimeout(()=>input.focus(),100);}
 }
+document.querySelectorAll(".theme-choice").forEach(b=>b.addEventListener("click",()=>applyTheme(b.dataset.theme)));
 applyProfile();
 if($("saveProfileBtn"))$("saveProfileBtn").addEventListener("click",saveProfile);
 state.events=loadEvents();
