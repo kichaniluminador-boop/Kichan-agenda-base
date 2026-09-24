@@ -560,7 +560,7 @@ body:has(#actionSheet.show){overflow:hidden!important}
     <div class="time-row"><div class="field compact-field"><label>🎚️ HORA PRUEBA</label><div class="soundcheck-wrap"><input id="test" class="control" type="time"><span class="soundcheck-sep">a</span><input id="testEnd" class="control" type="time"></div></div><div class="field compact-field"><label for="show">🎤 HORA SHOW</label><input id="show" class="control" type="time"></div></div>
     <div class="field"><label for="contact">👤 CONTACTO</label><input id="contact" class="control" type="text" placeholder="CONTACTO" autocomplete="off"></div>
     <div class="field"><label for="phone">📱 TELÉFONO</label><input id="phone" class="control" type="tel" placeholder="TELÉFONO" autocomplete="tel"></div>
-    <div class="status-row" style="display:none"><div class="field compact-field"><label for="status">✅ ESTADO</label><select id="status" class="control"><option value="Confirmado">Confirmado</option><option value="Reemplazo">Reemplazo</option><option value="Por confirmar">Por confirmar</option><option value="Cancelado">Cancelado</option></select></div><div class="field compact-field"><label for="payment">💰 PAGO</label><select id="payment" class="control"><option value="Pendiente">Pendiente</option><option value="Pagado">Pagado</option></select></div></div><div id="replacementPersonField" class="field" style="display:none"><label for="replacementPerson">👤 REEMPLAZA</label><input id="replacementPerson" class="control" type="text" placeholder="REEMPLAZA" autocomplete="off"></div>
+    <div class="status-row"><div class="field compact-field"><label for="status">✅ ESTADO</label><select id="status" class="control"><option value="Confirmado">Confirmado</option><option value="Reemplazo">Reemplazo</option><option value="Pendiente">Pendiente</option><option value="Cancelado">Cancelado</option></select></div><div class="field compact-field"><label for="payment">💰 PAGO</label><select id="payment" class="control"><option value="Pagado">Pagado</option><option value="Pendiente">Pendiente</option></select></div></div><div id="replacementPersonField" class="field" style="display:none"><label for="replacementPerson">👤 REEMPLAZA</label><input id="replacementPerson" class="control" type="text" placeholder="REEMPLAZA" autocomplete="off"></div>
     <div class="money-row"><div class="field compact-field"><label for="amount">💵 MONTO ACORDADO</label><div class="money-wrap"><input id="amount" class="control" type="text" inputmode="numeric" placeholder="0"></div></div><div class="field compact-field"><label for="extra">💰 EXTRA</label><div class="money-wrap"><input id="extra" class="control" type="text" inputmode="numeric" placeholder="0"></div></div></div>
     <div class="field"><label for="notes">📝 NOTAS</label><textarea id="notes" class="control" placeholder="NOTAS"></textarea></div>
     <div class="form-actions"><button id="cancelFormBtn" class="action" type="button">CANCELAR</button><button class="action save" type="submit">💾 GUARDAR</button></div>
@@ -633,7 +633,7 @@ function formatMoney(v){return "$"+new Intl.NumberFormat("es-CL",{maximumFractio
 function formatAmountInput(v){const n=numericAmount(v);return n?new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(n):""}
 function parseLocalDate(s){const p=normalizeDate(s).split("-");return p.length===3?new Date(+p[0],+p[1]-1,+p[2],12):null}
 function formatDateWithWeekday(s){const d=parseLocalDate(s);if(!d)return"";let w=new Intl.DateTimeFormat("es-CL",{weekday:"long"}).format(d);w=w[0].toUpperCase()+w.slice(1);return `${w} ${String(d.getDate()).padStart(2,"0")}-${String(d.getMonth()+1).padStart(2,"0")}-${d.getFullYear()}`}
-function normalizeEvent(r){if(!r||typeof r!=="object")return null;const date=normalizeDate(r.date??r.fecha),artist=cleanText(r.artist??r.artista??r.band??r.banda??r.nombre);if(!date||!artist)return null;return{id:cleanText(r.id)||makeId(),date,artist:upperText(artist),place:upperText(r.place??r.location??r.localidad??r.lugar),meeting:upperText(r.meeting??r.meetingPoint??r.puntoEncuentro??r.encuentro),departure:cleanText(r.departure??r.salida??r.horaSalida??r.arrival),test:cleanText(r.test??r.soundcheck??r.prueba??r.horaPrueba),testEnd:cleanText(r.testEnd??r.soundcheckEnd??r.pruebaFin??r.horaPruebaFin),show:cleanText(r.show??r.showtime??r.horaShow),contact:upperText(r.contact??r.contacto??r.contactName),phone:cleanText(r.phone??r.telefono??r.tel),status:cleanText(r.status??r.estado)||"Confirmado",payment:cleanText(r.payment??r.pago)||"Pendiente",amount:numericAmount(r.amount??r.monto),extra:numericAmount(r.extra??r.extras??r.montoExtra),replacementPerson:upperText(r.replacementPerson??r.reemplaza??r.reemplazante),notes:upperText(r.notes??r.notas),priority:Number.isFinite(Number(r.priority??r.prioridad))?Number(r.priority??r.prioridad):999}}
+function normalizeEvent(r){if(!r||typeof r!=="object")return null;const date=normalizeDate(r.date??r.fecha),artist=cleanText(r.artist??r.artista??r.band??r.banda??r.nombre);if(!date||!artist)return null;return{id:cleanText(r.id)||makeId(),date,artist:upperText(artist),place:upperText(r.place??r.location??r.localidad??r.lugar),meeting:upperText(r.meeting??r.meetingPoint??r.puntoEncuentro??r.encuentro),departure:cleanText(r.departure??r.salida??r.horaSalida??r.arrival),test:cleanText(r.test??r.soundcheck??r.prueba??r.horaPrueba),testEnd:cleanText(r.testEnd??r.soundcheckEnd??r.pruebaFin??r.horaPruebaFin),show:cleanText(r.show??r.showtime??r.horaShow),contact:upperText(r.contact??r.contacto??r.contactName),phone:cleanText(r.phone??r.telefono??r.tel),status:(cleanText(r.status??r.estado)==="Por confirmar"?"Pendiente":cleanText(r.status??r.estado))||"Confirmado",payment:cleanText(r.payment??r.pago)||"Pendiente",amount:numericAmount(r.amount??r.monto),extra:numericAmount(r.extra??r.extras??r.montoExtra),replacementPerson:upperText(r.replacementPerson??r.reemplaza??r.reemplazante),notes:upperText(r.notes??r.notas),priority:Number.isFinite(Number(r.priority??r.prioridad))?Number(r.priority??r.prioridad):999}}
 function sortEvents(a){return a.slice().sort((x,y)=>x.date.localeCompare(y.date)||((Number(x.priority)||999)-(Number(y.priority)||999))||(x.show||x.departure||"99:99").localeCompare(y.show||y.departure||"99:99"))}
 function loadEvents(){try{const r=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");return Array.isArray(r)?sortEvents(r.map(normalizeEvent).filter(Boolean)):[]}catch{return[]}}
 function saveEvents(){
@@ -767,7 +767,7 @@ function renderNextHero(){
  $("nextHeroPlace").textContent=n.place||"";
  $("nextHeroMeeting").textContent="";
  $("nextHeroDeparture").textContent=n.departure||"—";$("nextHeroTest").textContent=n.test?(n.testEnd?`${n.test} a ${n.testEnd}`:n.test):"—";$("nextHeroShow").textContent=n.show||"—";
- const statusLabel=n.status==="Por confirmar"?"PENDIENTE":n.status.toLocaleUpperCase("es-CL");
+ const statusLabel=n.status.toLocaleUpperCase("es-CL");
  const statusClass=n.status==="Confirmado"?"confirmado":n.status==="Reemplazo"?"reemplazo":n.status==="Cancelado"?"cancelado":"pendiente";
  $("nextHeroStatus").textContent=statusLabel;$("nextHeroStatus").className="next-status "+statusClass;
  const x=[];
@@ -1119,7 +1119,7 @@ function renderNextHero(){
  $("nextHeroWeekday").textContent=p.wd;$("nextHeroDay").textContent=p.day;$("nextHeroMonth").textContent=p.mon;
  $("nextHeroArtist").textContent=n.artist;$("nextHeroPlace").textContent=n.place||"";$("nextHeroMeeting").textContent="";
  $("nextHeroDeparture").textContent=n.departure||"—";$("nextHeroTest").textContent=n.test?(n.testEnd?`${n.test} a ${n.testEnd}`:n.test):"—";$("nextHeroShow").textContent=n.show||"—";
- const statusLabel=n.status==="Por confirmar"?"PENDIENTE":n.status.toLocaleUpperCase("es-CL");
+ const statusLabel=n.status.toLocaleUpperCase("es-CL");
  const statusClass=n.status==="Confirmado"?"confirmado":n.status==="Reemplazo"?"reemplazo":n.status==="Cancelado"?"cancelado":"pendiente";
  $("nextHeroStatus").textContent=statusLabel;$("nextHeroStatus").className="next-status "+statusClass;
  const x=[];
@@ -1144,6 +1144,11 @@ const renderDetailV35=renderDetail;
 renderDetail=function(){renderDetailV35();const e=state.events.find(x=>String(x.id)===String(state.detailId));if(!e)return;const t=document.querySelector('#detailContent .detail-title');if(t&&!document.querySelector('#detailContent .detail-subplace')){const d=document.createElement('div');d.className='detail-subplace';d.textContent=e.place||'';t.insertAdjacentElement('afterend',d)}};
 </script>
 
+<style id="v38-final-form-fix">
+/* V38: Estado/Pago restaurados y localidad ligeramente menor bajo artista */
+#formView .status-row{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:10px!important;width:100%!important;align-items:end!important}
+.next-info .next-place{font-size:16px!important;font-weight:850!important;text-align:center!important;margin-top:3px!important}
+</style>
 </body>
 </html>
 
