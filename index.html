@@ -637,7 +637,7 @@ function formatAmountInput(v){const n=numericAmount(v);return n?new Intl.NumberF
 function parseLocalDate(s){const p=normalizeDate(s).split("-");return p.length===3?new Date(+p[0],+p[1]-1,+p[2],12):null}
 function formatDateWithWeekday(s){const d=parseLocalDate(s);if(!d)return"";let w=new Intl.DateTimeFormat("es-CL",{weekday:"long"}).format(d);w=w[0].toUpperCase()+w.slice(1);return `${w} ${String(d.getDate()).padStart(2,"0")}-${String(d.getMonth()+1).padStart(2,"0")}-${d.getFullYear()}`}
 function normalizeEvent(r){if(!r||typeof r!=="object")return null;const date=normalizeDate(r.date??r.fecha),artist=cleanText(r.artist??r.artista??r.band??r.banda??r.nombre);if(!date||!artist)return null;return{id:cleanText(r.id)||makeId(),date,artist:upperText(artist),place:upperText(r.place??r.location??r.localidad??r.lugar),placeAddress:upperText(r.placeAddress??r.locationAddress??r.direccionLocalidad??r.direccionLugar),meeting:upperText(r.meeting??r.meetingPoint??r.puntoEncuentro??r.encuentro),meetingAddress:upperText(r.meetingAddress??r.meetingPointAddress??r.direccionEncuentro),departure:cleanText(r.departure??r.salida??r.horaSalida??r.arrival),test:cleanText(r.test??r.soundcheck??r.prueba??r.horaPrueba),testEnd:cleanText(r.testEnd??r.soundcheckEnd??r.pruebaFin??r.horaPruebaFin),show:cleanText(r.show??r.showtime??r.horaShow),contact:upperText(r.contact??r.contacto??r.contactName),phone:cleanText(r.phone??r.telefono??r.tel),status:(cleanText(r.status??r.estado)==="Por confirmar"?"Pendiente":cleanText(r.status??r.estado))||"Confirmado",payment:cleanText(r.payment??r.pago)||"Pendiente",amount:numericAmount(r.amount??r.monto),extra:numericAmount(r.extra??r.extras??r.montoExtra),replacementPerson:upperText(r.replacementPerson??r.reemplaza??r.reemplazante),notes:upperText(r.notes??r.notas),priority:Number.isFinite(Number(r.priority??r.prioridad))?Number(r.priority??r.prioridad):999}}
-function sortEvents(a){return a.slice().sort((x,y)=>x.date.localeCompare(y.date)||((Number(x.priority)||999)-(Number(y.priority)||999))||(x.show||x.departure||"99:99").localeCompare(y.show||y.departure||"99:99"))}
+function sortEvents(a){const pr=v=>Number.isFinite(Number(v))?Number(v):999;return a.slice().sort((x,y)=>x.date.localeCompare(y.date)||(pr(x.priority)-pr(y.priority))||(x.show||x.departure||"99:99").localeCompare(y.show||y.departure||"99:99"))}
 function loadEvents(){try{const r=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");return Array.isArray(r)?sortEvents(r.map(normalizeEvent).filter(Boolean)):[]}catch{return[]}}
 function saveEvents(){
  state.events=sortEvents(state.events);
@@ -1431,7 +1431,7 @@ renderAll();
 <!-- v50 · selector de prestación Próximo para días con varias prestaciones -->
 <style id="next-day-selector-v50">
 #homeView #nextHeroCard{position:relative!important}
-#homeView .next-day-counter-v50{position:absolute;right:14px;top:92px;z-index:12;min-width:42px;height:27px;padding:0 9px;border-radius:14px;border:1px solid currentColor;background:rgba(7,16,24,.88);color:var(--accent,#35c9ff);font-size:11px;font-weight:900;letter-spacing:.4px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 8px color-mix(in srgb,currentColor 28%,transparent)}
+#homeView .next-hero-head{position:relative!important}#homeView .next-day-counter-v50{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:12;min-width:42px;height:25px;padding:0 8px;border-radius:14px;border:1px solid currentColor;background:rgba(7,16,24,.88);color:var(--accent,#35c9ff);font-size:10px;font-weight:900;letter-spacing:.4px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 8px color-mix(in srgb,currentColor 28%,transparent)}
 #calendarView .set-next-v50{width:100%;margin:8px 0 2px;padding:10px 12px;border-radius:13px;border:1px solid var(--accent,#35c9ff);background:rgba(8,18,27,.78);color:var(--accent,#35c9ff);font-size:11px;font-weight:900;letter-spacing:.35px;text-transform:uppercase}
 #calendarView .set-next-v50.is-next{background:color-mix(in srgb,var(--accent,#35c9ff) 14%,rgba(8,18,27,.9));box-shadow:0 0 10px color-mix(in srgb,var(--accent,#35c9ff) 25%,transparent)}
 </style>
@@ -1453,7 +1453,7 @@ renderAll();
    const pos=Math.max(0,same.findIndex(e=>String(e.id)===String(n.id)))+1;
    const b=document.createElement('button');b.type='button';b.className='next-day-counter-v50';b.textContent=`${pos}/${same.length}`;b.setAttribute('aria-label',`${pos} de ${same.length} prestaciones este día`);
    b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();goDay(n.date)};
-   card.appendChild(b);
+   (card.querySelector('.next-hero-head')||card).appendChild(b);
  };
  const oldHero=renderNextHero;
  renderNextHero=function(){oldHero();decorateHero()};
@@ -1470,8 +1470,9 @@ renderAll();
      const b=document.createElement('button');b.type='button';b.className='set-next-v50'+(isNext?' is-next':'');b.textContent=isNext?'★ EN PRÓXIMO':'☆ DEJAR EN PRÓXIMO';
      b.onclick=ev=>{
        ev.preventDefault();ev.stopPropagation();
+       if(isNext)return;
        const same=state.events.filter(x=>x.date===e.date);
-       same.forEach(x=>x.priority=(Number(x.priority)||999)+1);
+       same.forEach(x=>x.priority=1000);
        e.priority=0;
        saveEvents();renderAll();state.selectedDate=e.date;renderCalendar();
      };
