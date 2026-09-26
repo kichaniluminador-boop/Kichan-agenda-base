@@ -1,10 +1,13 @@
-const CACHE_NAME = "agenda-base-v1";
+const CACHE_NAME = "agenda-crew-v2";
 
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./agenda-icon-512.png"
+  "./apple-touch-icon.png",
+  "./agenda-icon-192.png",
+  "./agenda-icon-512.png",
+  "./agenda-icon-maskable-512.png"
 ];
 
 self.addEventListener("install", event => {
