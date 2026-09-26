@@ -1573,17 +1573,16 @@ renderDetail=function(){renderDetailV35();const e=state.events.find(x=>String(x.
 #settingsView .chromatic-swatch-v55{width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 8px rgba(var(--stage-rgb),.5)}
 </style>
 
-<style id="v62-ios-fixed-navigation">
-/* V62 — iPhone/PWA: el contenido hace scroll; la navegación queda anclada al viewport. */
-html,body{height:100%;min-height:100%;overflow:hidden!important;overscroll-behavior:none;}
-body{position:relative!important;}
+<style id="v63-ios-single-fixed-navigation">
+/* V63 — iPhone/PWA: una sola barra fija. El documento hace scroll normalmente.
+   Evita el doble layer de WebKit provocado por un contenedor interno con momentum scroll. */
+html,body{height:auto!important;min-height:100%!important;overflow-x:hidden!important;}
+body{position:relative!important;overflow-y:auto!important;-webkit-overflow-scrolling:auto!important;}
 main.app{
-  height:100dvh!important;
+  height:auto!important;
   min-height:100dvh!important;
-  overflow-x:hidden!important;
-  overflow-y:auto!important;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior-y:contain;
+  overflow:visible!important;
+  padding-bottom:calc(125px + env(safe-area-inset-bottom))!important;
 }
 #bottomNav.bottom-nav{
   position:fixed!important;
@@ -1592,6 +1591,8 @@ main.app{
   bottom:calc(1px + env(safe-area-inset-bottom))!important;
   transform:translate(-50%,6px)!important;
   z-index:10000!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
 }
 </style>
 </body>
