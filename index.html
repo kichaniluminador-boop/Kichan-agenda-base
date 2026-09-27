@@ -889,6 +889,8 @@ function renderDirectory(){
    if(confirm(`¿ELIMINAR A ${x.name}?`)){directory.colleagues.splice(i,1);openDirectoryColleagueIndex=-1;saveDirectory()}
  });
 }
+function addDirectoryArtist(){const v=upperText($("directoryArtistName")?.value);if(!v)return;if(!directory.artists.includes(v))directory.artists.push(v);$("directoryArtistName").value="";saveDirectory()}
+function addDirectoryPlace(){const name=upperText($("directoryPlaceName")?.value),address=upperText($("directoryPlaceAddress")?.value);if(!name)return;const i=directory.places.findIndex(x=>x.name===name);if(i>=0)directory.places[i]={name,address};else directory.places.push({name,address});$("directoryPlaceName").value="";$("directoryPlaceAddress").value="";saveDirectory()}
 function addDirectoryColleague(){const name=upperText($("directoryColleagueName")?.value),phone=cleanText($("directoryColleaguePhone")?.value),specialty=upperText($("directoryColleagueSpecialty")?.value);if(!name)return;const i=(directory.colleagues||[]).findIndex(x=>x.name===name);if(i>=0)directory.colleagues[i]={name,phone,specialty};else directory.colleagues.push({name,phone,specialty});$("directoryColleagueName").value="";$("directoryColleaguePhone").value="";$("directoryColleagueSpecialty").value="";saveDirectory()}
 function applyDirectoryPlace(){const name=upperText($("place")?.value),x=directory.places.find(p=>p.name===name);if(x&&x.address&&$("placeAddress"))$("placeAddress").value=x.address}
 const state={events:[],view:"home",editingId:null,returnView:"home",selectedDate:"",calendarYear:new Date().getFullYear(),calendarMonth:new Date().getMonth(),financeYear:new Date().getFullYear(),listFilter:"",detailId:null,detailReturnView:"home"};
@@ -1391,12 +1393,7 @@ async function validarLicencia(codigo){
   const data=await res.json();
   return Array.isArray(data)&&data.length?data[0]:null;
 }
-function abrirAgenda(){
- document.body.classList.add("license-authorized");
- document.body.classList.remove("license-checking");
- document.body.style.overflow="";
- const g=$("licenseGate");if(g)g.style.display="none";
-}
+function abrirAgenda(){const g=$("licenseGate");if(g)g.style.display="none"}
 async function activarLicencia(codigo,automatico=false){
   const btn=$("licenseBtn"),msg=$("licenseMsg"),input=$("licenseCode");
   btn.disabled=true;msg.className="license-msg";msg.textContent="Validando…";
