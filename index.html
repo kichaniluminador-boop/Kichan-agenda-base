@@ -1391,7 +1391,12 @@ async function validarLicencia(codigo){
   const data=await res.json();
   return Array.isArray(data)&&data.length?data[0]:null;
 }
-function abrirAgenda(){const g=$("licenseGate");if(g)g.style.display="none"}
+function abrirAgenda(){
+ document.body.classList.add("license-authorized");
+ document.body.classList.remove("license-checking");
+ document.body.style.overflow="";
+ const g=$("licenseGate");if(g)g.style.display="none";
+}
 async function activarLicencia(codigo,automatico=false){
   const btn=$("licenseBtn"),msg=$("licenseMsg"),input=$("licenseCode");
   btn.disabled=true;msg.className="license-msg";msg.textContent="Validando…";
