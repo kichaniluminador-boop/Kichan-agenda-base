@@ -353,6 +353,26 @@
 
 /* V58: MI DIRECTORIO — iconografía Agenda Crew + colegas/reemplazos */
 .directory-title-v58{display:flex;align-items:center;justify-content:center;gap:8px}.directory-line-icon-v58{width:21px;height:21px;display:inline-flex;align-items:center;justify-content:center;color:var(--gold);flex:0 0 21px}.directory-line-icon-v58 svg{width:20px;height:20px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.directory-launch-icon-v57{display:inline-flex;align-items:center;justify-content:center;color:var(--gold)}.directory-launch-icon-v57 svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.directory-colleague-meta-v58{display:flex;flex-wrap:wrap;gap:5px 10px;margin-top:4px}.directory-colleague-meta-v58 small{margin:0}.directory-item-v56 .directory-delete-v56{width:34px;height:34px;display:flex;align-items:center;justify-content:center}.directory-delete-v56 svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* V60 — MI DIRECTORIO aprobado: orden, colegas desplegables y acciones */
+#directoryView .directory-grid-v56{display:grid;gap:14px}
+.directory-colleague-card-v60{overflow:hidden;border:1px solid #333;border-radius:15px;background:#171717}
+.directory-colleague-head-v60{width:100%;min-height:58px;border:0;background:transparent;color:#fff;display:grid;grid-template-columns:minmax(0,1fr) 30px;align-items:center;gap:10px;padding:13px 15px;text-align:left}
+.directory-colleague-head-v60 b{font-size:14px;letter-spacing:.25px}
+.directory-chevron-v60{color:var(--gold);font-size:27px;line-height:1;text-align:center;transition:transform .18s ease}
+.directory-colleague-card-v60.open .directory-chevron-v60{transform:rotate(90deg)}
+.directory-colleague-detail-v60{display:none;padding:0 14px 14px;border-top:1px solid #303030}
+.directory-colleague-card-v60.open .directory-colleague-detail-v60{display:block}
+.directory-detail-row-v60{padding:11px 2px;border-bottom:1px solid #2d2d2d}
+.directory-detail-row-v60 small{display:block;margin-bottom:4px;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:1.2px}
+.directory-detail-row-v60 strong{display:block;color:#fff;font-size:14px;line-height:1.3}
+.directory-colleague-actions-v60{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}
+.directory-edit-v60,.directory-remove-v60{min-height:43px;border:1px solid #444;border-radius:13px;background:#242424;font-weight:900;font-size:11px}
+.directory-edit-v60{color:var(--gold)}
+.directory-remove-v60{color:#ff8585;border-color:#633}
+.directory-remove-v60 svg{width:16px;height:16px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#directoryView.active ~ #bottomNav,#directoryView.active + #bottomNav{display:none!important}
+body:has(#directoryView.active) #bottomNav{display:none!important}
+
 </style>
 
 <style>
@@ -746,7 +766,7 @@ body:has(#actionSheet.show){overflow:hidden!important}
     <button id="saveProfileBtn" class="tool-btn" type="button">💾 GUARDAR AJUSTES</button>
   </div></section>
   <section class="backup-section"><h2 class="backup-title">Mi Directorio</h2><div class="tools">
-    <button id="openDirectoryBtn" class="directory-launch-v57" type="button"><span class="directory-launch-icon-v57" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span><b>MI DIRECTORIO</b><small>BANDAS · RECINTOS · COLEGAS</small></span><span class="directory-launch-arrow-v57">›</span></button>
+    <button id="openDirectoryBtn" class="directory-launch-v57" type="button"><span class="directory-launch-icon-v57" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span><b>MI DIRECTORIO</b><small>COLEGAS · BANDAS · RECINTOS</small></span><span class="directory-launch-arrow-v57">›</span></button>
   </div></section>
   <section class="backup-section"><h2 class="backup-title">Respaldo de agenda</h2><div class="tools"><div class="tool-buttons">
     <button id="exportBtn" class="tool-btn" type="button">⬇️ CREAR RESPALDO</button>
@@ -759,11 +779,11 @@ body:has(#actionSheet.show){overflow:hidden!important}
 <section id="directoryView" class="view">
   <div class="brand">KICHAN ILUMINADOR</div><h1 class="page-title">Mi Directorio</h1>
   <button id="directoryBackBtn" class="detail-back" type="button">← VOLVER</button>
-  <div class="directory-note-v56">Guarda tus bandas, productoras, recintos y colegas habituales. Aparecerán como sugerencias al crear una prestación y al asignar un reemplazo.</div>
+  <div class="directory-note-v56">Guarda tus colegas, bandas, productoras y recintos habituales. Aparecerán como sugerencias al crear una prestación y al asignar un reemplazo.</div>
   <div class="directory-grid-v56">
+    <div class="directory-box-v56"><h3 class="directory-title-v58"><span class="directory-line-icon-v58" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>COLEGAS · REEMPLAZOS</h3><div class="directory-fields-v56"><input id="directoryColleagueName" class="control" type="text" placeholder="NOMBRE" autocomplete="off"><input id="directoryColleaguePhone" class="control" type="tel" placeholder="TELÉFONO" autocomplete="tel"><input id="directoryColleagueSpecialty" class="control" type="text" placeholder="ESPECIALIDAD / NOTA (OPCIONAL)" autocomplete="off"><button id="directoryColleagueAdd" class="tool-btn directory-add-v56" type="button">＋ AGREGAR</button></div><div id="directoryColleagueList" class="directory-list-v56"></div></div>
     <div class="directory-box-v56"><h3 class="directory-title-v58"><span class="directory-line-icon-v58" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 18v3M8 21h8"/><rect x="8" y="3" width="8" height="13" rx="4"/><path d="M5 10a7 7 0 0 0 14 0"/></svg></span>BANDAS / ARTISTAS / PRODUCTORAS</h3><div class="directory-fields-v56"><input id="directoryArtistName" class="control" type="text" placeholder="NOMBRE" autocomplete="off"><button id="directoryArtistAdd" class="tool-btn directory-add-v56" type="button">＋ AGREGAR</button></div><div id="directoryArtistList" class="directory-list-v56"></div></div>
     <div class="directory-box-v56"><h3 class="directory-title-v58"><span class="directory-line-icon-v58" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>RECINTOS · TEATROS · BARES</h3><div class="directory-fields-v56"><input id="directoryPlaceName" class="control" type="text" placeholder="NOMBRE DEL RECINTO" autocomplete="off"><input id="directoryPlaceAddress" class="control" type="text" placeholder="DIRECCIÓN" autocomplete="off"><button id="directoryPlaceAdd" class="tool-btn directory-add-v56" type="button">＋ AGREGAR</button></div><div id="directoryPlaceList" class="directory-list-v56"></div></div>
-    <div class="directory-box-v56"><h3 class="directory-title-v58"><span class="directory-line-icon-v58" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>COLEGAS · REEMPLAZOS</h3><div class="directory-fields-v56"><input id="directoryColleagueName" class="control" type="text" placeholder="NOMBRE" autocomplete="off"><input id="directoryColleaguePhone" class="control" type="tel" placeholder="TELÉFONO" autocomplete="tel"><input id="directoryColleagueSpecialty" class="control" type="text" placeholder="ESPECIALIDAD / NOTA (OPCIONAL)" autocomplete="off"><button id="directoryColleagueAdd" class="tool-btn directory-add-v56" type="button">＋ AGREGAR</button></div><div id="directoryColleagueList" class="directory-list-v56"></div></div>
   </div>
 </section>
 <section id="listView" class="view">
@@ -830,9 +850,45 @@ function loadDirectory(){try{const d=JSON.parse(localStorage.getItem(DIRECTORY_K
 let directory={artists:[],places:[],colleagues:[]};
 function saveDirectory(){directory.artists=[...new Set(directory.artists.map(upperText).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));const seen=new Set();directory.places=directory.places.map(x=>({name:upperText(x.name),address:upperText(x.address)})).filter(x=>x.name&&!seen.has(x.name)&&(seen.add(x.name),true)).sort((a,b)=>a.name.localeCompare(b.name,"es"));const seenColleagues=new Set();directory.colleagues=(Array.isArray(directory.colleagues)?directory.colleagues:[]).map(x=>({name:upperText(x.name),phone:cleanText(x.phone),specialty:upperText(x.specialty)})).filter(x=>x.name&&!seenColleagues.has(x.name)&&(seenColleagues.add(x.name),true)).sort((a,b)=>a.name.localeCompare(b.name,"es"));localStorage.setItem(DIRECTORY_KEY,JSON.stringify(directory));renderDirectory();programarGuardadoNube()}
 function directoryTrashIcon(){return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 15H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>`}
-function renderDirectory(){const al=$("directoryArtistList"),pl=$("directoryPlaceList"),cl=$("directoryColleagueList"),ao=$("directoryArtistOptions"),po=$("directoryPlaceOptions"),co=$("directoryColleagueOptions");if(ao)ao.innerHTML=directory.artists.map(x=>`<option value="${x.replace(/&/g,"&amp;").replace(/"/g,"&quot;")}"></option>`).join("");if(po)po.innerHTML=directory.places.map(x=>`<option value="${x.name.replace(/&/g,"&amp;").replace(/"/g,"&quot;")}"></option>`).join("");if(co)co.innerHTML=(directory.colleagues||[]).map(x=>`<option value="${x.name.replace(/&/g,"&amp;").replace(/"/g,"&quot;")}">${[x.specialty,x.phone].filter(Boolean).join(" · ")}</option>`).join("");if(al)al.innerHTML=directory.artists.length?directory.artists.map((x,i)=>`<div class="directory-item-v56"><div><b>${x}</b></div><button class="directory-delete-v56" data-dir-artist="${i}" type="button" aria-label="Eliminar">${directoryTrashIcon()}</button></div>`).join(""):`<div class="directory-empty-v56">AÚN NO HAY NOMBRES GUARDADOS</div>`;if(pl)pl.innerHTML=directory.places.length?directory.places.map((x,i)=>`<div class="directory-item-v56"><div><b>${x.name}</b>${x.address?`<small>${x.address}</small>`:""}</div><button class="directory-delete-v56" data-dir-place="${i}" type="button" aria-label="Eliminar">${directoryTrashIcon()}</button></div>`).join(""):`<div class="directory-empty-v56">AÚN NO HAY RECINTOS GUARDADOS</div>`;if(cl)cl.innerHTML=(directory.colleagues||[]).length?directory.colleagues.map((x,i)=>`<div class="directory-item-v56"><div><b>${x.name}</b><div class="directory-colleague-meta-v58">${x.specialty?`<small>${x.specialty}</small>`:""}${x.phone?`<small>${x.phone}</small>`:""}</div></div><button class="directory-delete-v56" data-dir-colleague="${i}" type="button" aria-label="Eliminar">${directoryTrashIcon()}</button></div>`).join(""):`<div class="directory-empty-v56">AÚN NO HAY COLEGAS GUARDADOS</div>`;document.querySelectorAll("[data-dir-artist]").forEach(b=>b.onclick=()=>{directory.artists.splice(Number(b.dataset.dirArtist),1);saveDirectory()});document.querySelectorAll("[data-dir-place]").forEach(b=>b.onclick=()=>{directory.places.splice(Number(b.dataset.dirPlace),1);saveDirectory()});document.querySelectorAll("[data-dir-colleague]").forEach(b=>b.onclick=()=>{directory.colleagues.splice(Number(b.dataset.dirColleague),1);saveDirectory()})}
-function addDirectoryArtist(){const v=upperText($("directoryArtistName")?.value);if(!v)return;if(!directory.artists.includes(v))directory.artists.push(v);$("directoryArtistName").value="";saveDirectory()}
-function addDirectoryPlace(){const name=upperText($("directoryPlaceName")?.value),address=upperText($("directoryPlaceAddress")?.value);if(!name)return;const i=directory.places.findIndex(x=>x.name===name);if(i>=0)directory.places[i]={name,address};else directory.places.push({name,address});$("directoryPlaceName").value="";$("directoryPlaceAddress").value="";saveDirectory()}
+let openDirectoryColleagueIndex=-1;
+function directoryEsc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderDirectory(){
+ const al=$("directoryArtistList"),pl=$("directoryPlaceList"),cl=$("directoryColleagueList"),ao=$("directoryArtistOptions"),po=$("directoryPlaceOptions"),co=$("directoryColleagueOptions");
+ if(ao)ao.innerHTML=directory.artists.map(x=>`<option value="${directoryEsc(x)}"></option>`).join("");
+ if(po)po.innerHTML=directory.places.map(x=>`<option value="${directoryEsc(x.name)}"></option>`).join("");
+ if(co)co.innerHTML=(directory.colleagues||[]).map(x=>`<option value="${directoryEsc(x.name)}">${directoryEsc([x.specialty,x.phone].filter(Boolean).join(" · "))}</option>`).join("");
+ if(al)al.innerHTML=directory.artists.length?directory.artists.map((x,i)=>`<div class="directory-item-v56"><div><b>${directoryEsc(x)}</b></div><button class="directory-delete-v56" data-dir-artist="${i}" type="button" aria-label="Eliminar">${directoryTrashIcon()}</button></div>`).join(""):`<div class="directory-empty-v56">AÚN NO HAY NOMBRES GUARDADOS</div>`;
+ if(pl)pl.innerHTML=directory.places.length?directory.places.map((x,i)=>`<div class="directory-item-v56"><div><b>${directoryEsc(x.name)}</b>${x.address?`<small>${directoryEsc(x.address)}</small>`:""}</div><button class="directory-delete-v56" data-dir-place="${i}" type="button" aria-label="Eliminar">${directoryTrashIcon()}</button></div>`).join(""):`<div class="directory-empty-v56">AÚN NO HAY RECINTOS GUARDADOS</div>`;
+ if(cl)cl.innerHTML=(directory.colleagues||[]).length?directory.colleagues.map((x,i)=>{
+   const opened=i===openDirectoryColleagueIndex;
+   return `<div class="directory-colleague-card-v60${opened?" open":""}" data-colleague-card="${i}">
+     <button class="directory-colleague-head-v60" data-colleague-toggle="${i}" type="button" aria-expanded="${opened}">
+       <b>${directoryEsc(x.name)}</b><span class="directory-chevron-v60">›</span>
+     </button>
+     <div class="directory-colleague-detail-v60">
+       <div class="directory-detail-row-v60"><small>NOMBRE</small><strong>${directoryEsc(x.name)}</strong></div>
+       <div class="directory-detail-row-v60"><small>TELÉFONO</small><strong>${directoryEsc(x.phone||"—")}</strong></div>
+       <div class="directory-detail-row-v60"><small>NOTAS / ESPECIALIDAD</small><strong>${directoryEsc(x.specialty||"—")}</strong></div>
+       <div class="directory-colleague-actions-v60">
+         <button class="directory-edit-v60" data-dir-colleague-edit="${i}" type="button">✎ EDITAR</button>
+         <button class="directory-remove-v60" data-dir-colleague-delete="${i}" type="button">${directoryTrashIcon()} ELIMINAR</button>
+       </div>
+     </div>
+   </div>`;
+ }).join(""):`<div class="directory-empty-v56">AÚN NO HAY COLEGAS GUARDADOS</div>`;
+ document.querySelectorAll("[data-dir-artist]").forEach(b=>b.onclick=()=>{directory.artists.splice(Number(b.dataset.dirArtist),1);saveDirectory()});
+ document.querySelectorAll("[data-dir-place]").forEach(b=>b.onclick=()=>{directory.places.splice(Number(b.dataset.dirPlace),1);saveDirectory()});
+ document.querySelectorAll("[data-colleague-toggle]").forEach(b=>b.onclick=()=>{const i=Number(b.dataset.colleagueToggle);openDirectoryColleagueIndex=openDirectoryColleagueIndex===i?-1:i;renderDirectory()});
+ document.querySelectorAll("[data-dir-colleague-edit]").forEach(b=>b.onclick=e=>{
+   e.stopPropagation(); const i=Number(b.dataset.dirColleagueEdit),x=directory.colleagues[i]; if(!x)return;
+   $("directoryColleagueName").value=x.name||"";$("directoryColleaguePhone").value=x.phone||"";$("directoryColleagueSpecialty").value=x.specialty||"";
+   directory.colleagues.splice(i,1);openDirectoryColleagueIndex=-1;saveDirectory();$("directoryColleagueName").focus();window.scrollTo({top:document.querySelector("#directoryView .directory-box-v56")?.offsetTop||0,behavior:"smooth"});
+ });
+ document.querySelectorAll("[data-dir-colleague-delete]").forEach(b=>b.onclick=e=>{
+   e.stopPropagation(); const i=Number(b.dataset.dirColleagueDelete),x=directory.colleagues[i]; if(!x)return;
+   if(confirm(`¿ELIMINAR A ${x.name}?`)){directory.colleagues.splice(i,1);openDirectoryColleagueIndex=-1;saveDirectory()}
+ });
+}
 function addDirectoryColleague(){const name=upperText($("directoryColleagueName")?.value),phone=cleanText($("directoryColleaguePhone")?.value),specialty=upperText($("directoryColleagueSpecialty")?.value);if(!name)return;const i=(directory.colleagues||[]).findIndex(x=>x.name===name);if(i>=0)directory.colleagues[i]={name,phone,specialty};else directory.colleagues.push({name,phone,specialty});$("directoryColleagueName").value="";$("directoryColleaguePhone").value="";$("directoryColleagueSpecialty").value="";saveDirectory()}
 function applyDirectoryPlace(){const name=upperText($("place")?.value),x=directory.places.find(p=>p.name===name);if(x&&x.address&&$("placeAddress"))$("placeAddress").value=x.address}
 const state={events:[],view:"home",editingId:null,returnView:"home",selectedDate:"",calendarYear:new Date().getFullYear(),calendarMonth:new Date().getMonth(),financeYear:new Date().getFullYear(),listFilter:"",detailId:null,detailReturnView:"home"};
