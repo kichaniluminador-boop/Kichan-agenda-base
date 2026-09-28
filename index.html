@@ -2592,3 +2592,53 @@ body.license-authorized #bottomNav{visibility:visible;}
 })();
 </script>
 
+<style id="calendar-remaining-icons-v67">
+/* V67 — SOLO CALENDARIO: Prueba, Show y Notas */
+#selectedDateEvents .calendar-time-icon-v67,
+#selectedDateEvents .calendar-note-icon-v67{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--gold);
+  flex:0 0 auto;
+}
+#selectedDateEvents .calendar-time-icon-v67{
+  width:18px;height:18px;vertical-align:-4px;margin:0 3px 0 1px;
+}
+#selectedDateEvents .calendar-note-icon-v67{
+  width:21px;height:21px;flex:0 0 21px;
+}
+#selectedDateEvents .calendar-time-icon-v67 svg,
+#selectedDateEvents .calendar-note-icon-v67 svg{
+  width:100%;height:100%;display:block;fill:none;stroke:currentColor;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+}
+/* Mantener Notas en una sola fila: icono izquierda + texto derecha */
+#selectedDateEvents .compact-notes{
+  display:flex;align-items:center;gap:9px;
+}
+</style>
+<script id="calendar-remaining-icons-script-v67">
+(function(){
+ const testIcon='<span class="calendar-time-icon-v67" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h10"/><circle cx="17" cy="7" r="2"/><path d="M20 7h0M4 12h3"/><circle cx="10" cy="12" r="2"/><path d="M13 12h7M4 17h8"/><circle cx="15" cy="17" r="2"/><path d="M18 17h2"/></svg></span>';
+ const showIcon='<span class="calendar-time-icon-v67" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg></span>';
+ const noteIcon='<span class="calendar-note-icon-v67" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h6"/></svg></span>';
+
+ function decorate(){
+  document.querySelectorAll('#selectedDateEvents .compact-line.muted').forEach(row=>{
+   if(row.innerHTML.includes('🎚️')) row.innerHTML=row.innerHTML.replace('🎚️',testIcon);
+   if(row.innerHTML.includes('🎤')) row.innerHTML=row.innerHTML.replace('🎤',showIcon);
+  });
+  document.querySelectorAll('#selectedDateEvents .compact-notes').forEach(row=>{
+   if(row.querySelector('.calendar-note-icon-v67')) return;
+   if(row.innerHTML.includes('📝')) row.innerHTML=row.innerHTML.replace('📝',noteIcon);
+  });
+ }
+ const list=document.getElementById('selectedDateEvents');
+ if(list){
+  new MutationObserver(decorate).observe(list,{childList:true,subtree:true});
+  decorate();
+ }
+})();
+</script>
+
