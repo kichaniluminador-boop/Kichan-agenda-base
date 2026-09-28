@@ -2550,3 +2550,45 @@ body.license-authorized #bottomNav{visibility:visible;}
  if(state.view==='home')renderAll();
 })();
 </script>
+
+<style id="calendar-departure-icon-only-v66">
+/* V66 — SOLO CALENDARIO: icono lineal para HORA SALIDA */
+#selectedDateEvents .calendar-departure-icon-v66{
+  width:18px;
+  height:18px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--gold);
+  vertical-align:-4px;
+  margin:0 3px 0 1px;
+}
+#selectedDateEvents .calendar-departure-icon-v66 svg{
+  width:18px;
+  height:18px;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+</style>
+<script id="calendar-departure-icon-only-script-v66">
+(function(){
+ const busIcon='<span class="calendar-departure-icon-v66" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 17h12"/><path d="M6 17a3 3 0 0 1-3-3V7c0-3 2-4 9-4s9 1 9 4v7a3 3 0 0 1-3 3"/><path d="M5 11h14"/><circle cx="7" cy="14" r="1"/><circle cx="17" cy="14" r="1"/><path d="M6 17v3M18 17v3"/></svg></span>';
+ function decorateCalendarDeparture(){
+  document.querySelectorAll('#selectedDateEvents .compact-line.muted').forEach(row=>{
+   if(row.querySelector('.calendar-departure-icon-v66'))return;
+   if(!row.innerHTML.includes('🚌'))return;
+   row.innerHTML=row.innerHTML.replace('🚌',busIcon);
+  });
+ }
+ const list=document.getElementById('selectedDateEvents');
+ if(list){
+  new MutationObserver(decorateCalendarDeparture).observe(list,{childList:true,subtree:true});
+  decorateCalendarDeparture();
+ }
+})();
+</script>
+
