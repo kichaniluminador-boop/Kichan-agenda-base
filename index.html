@@ -1709,6 +1709,66 @@ main.app{
  if(list){new MutationObserver(decorateSearchCards).observe(list,{childList:true,subtree:true});decorateSearchCards()}
 })();
 </script>
+
+
+<style id="v65-search-card-accent-and-date-only">
+/* V65 — SOLO tarjetas de búsqueda: mes abreviado + iconos al color elegido */
+#homeView #upcomingList .compact-route .cal-line-icon,
+#homeView #upcomingList .search-card-extra-icon-v65{
+  color:var(--gold)!important;
+}
+#homeView #upcomingList .search-card-extra-icon-v65{
+  width:22px;
+  height:22px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 22px;
+  vertical-align:-5px;
+}
+#homeView #upcomingList .search-card-extra-icon-v65 svg{
+  width:100%;
+  height:100%;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+</style>
+<script id="v65-search-card-accent-and-date-only-script">
+(function(){
+ const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+ const person='<span class="search-card-extra-icon-v65" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>';
+ const notes='<span class="search-card-extra-icon-v65" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3h14v18H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>';
+ function searchDate(s){
+   const m=String(s||'').match(/^(.+?)\s(\d{2})-(\d{2})-(\d{4})$/);
+   if(!m)return s;
+   const i=Number(m[3])-1;
+   return i>=0&&i<12?`${m[1]} ${m[2]}-${months[i]}-${m[4]}`:s;
+ }
+ function decorate(){
+   document.querySelectorAll('#homeView #upcomingList .compact-card').forEach(card=>{
+     const date=card.querySelector('.compact-date');
+     if(date)date.textContent=searchDate(date.textContent.trim());
+     card.querySelectorAll('.compact-line').forEach(row=>{
+       const txt=(row.textContent||'').trim();
+       if(txt.includes('REEMPLAZA')&&!row.querySelector('.search-card-extra-icon-v65')){
+         row.innerHTML=row.innerHTML.replace(/👤\s*/u,person+' ');
+       }
+     });
+     const note=card.querySelector('.compact-notes');
+     if(note&&!note.querySelector('.search-card-extra-icon-v65')){
+       note.innerHTML=note.innerHTML.replace(/📝\s*/u,notes+' ');
+     }
+   });
+ }
+ const list=document.getElementById('upcomingList');
+ if(list){new MutationObserver(decorate).observe(list,{childList:true,subtree:true});decorate()}
+})();
+</script>
+
 </body>
 
 <style id="v63-detail-two-fixes">
