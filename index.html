@@ -1660,6 +1660,14 @@ main.app{
 }
 </style>
 </body>
+
+<style id="v63-detail-two-fixes">
+/* V63 — SOLO SUBTARJETA: espacio de PRUEBA DE SONIDO + separación REEMPLAZA */
+#detailView .detail-times{grid-template-columns:minmax(0,.82fr) minmax(0,1.36fr) minmax(0,.82fr)!important}
+#detailView .detail-time:nth-child(2){padding-left:4px!important;padding-right:4px!important}
+#detailView .detail-notes-v35:has(.detail-replacement-name-v63){column-gap:6px!important}
+#detailView .detail-replacement-name-v63{flex:0 1 auto!important;min-width:0!important}
+</style>
 </html>
 
 <style>
@@ -1839,7 +1847,7 @@ renderAll();
   <div class="detail-times"><div class="detail-time"><div class="detail-time-label">🚌 SALIDA</div><strong>${e.departure||'—'}</strong></div><div class="detail-time"><div class="detail-time-label">🎚️ PRUEBA DE SONIDO</div><strong class="detail-test-range">${testLabel}</strong></div><div class="detail-time"><div class="detail-time-label">🎤 SHOW</div><strong>${e.show||'—'}</strong></div></div>
   ${(e.place||e.placeAddress||e.meeting||e.meetingAddress)?`<div class="detail-location-pair"><div class="detail-location-cell"><span class="detail-location-icon">📍</span><span class="detail-location-copy"><b>${e.place||'LOCALIDAD'}</b>${e.placeAddress?`<small>${e.placeAddress}</small>`:''}</span></div><div class="detail-location-cell"><span class="detail-location-icon">📌</span><span class="detail-location-copy"><b>${e.meeting||'PUNTO DE ENCUENTRO'}</b>${e.meetingAddress?`<small>${e.meetingAddress}</small>`:''}</span></div></div>`:''}
   ${(e.contact||hasPhone)?`<div class="detail-contact-row"><div class="detail-contact-name"><span class="detail-contact-icon"><span class="card-line-icon card-person-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span></span><span>${e.contact||'CONTACTO'}</span></div>${hasPhone?`<button id="detailCallV35" class="detail-contact-action" type="button" aria-label="Llamar">${phoneSvg}</button><button id="detailWaV35" class="detail-contact-action wa" type="button" aria-label="WhatsApp">${waSvg}</button>`:'<span></span><span></span>'}</div>`:''}
-  ${e.status==='Va Remplazo'&&e.replacementPerson?`<div class="detail-notes-v35"><strong><span class="card-line-icon card-person-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span> REEMPLAZA</strong>${e.replacementPerson}</div>`:''}${e.notes?`<div class="detail-notes-v35"><strong><span class="card-line-icon card-notes-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3h14v18H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span> NOTAS</strong>${e.notes}</div>`:''}
+  ${e.status==='Va Remplazo'&&e.replacementPerson?`<div class="detail-notes-v35"><strong><span class="card-line-icon card-person-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span> REEMPLAZA:</strong><span class="detail-replacement-name-v63">${e.replacementPerson}</span></div>`:''}${e.notes?`<div class="detail-notes-v35"><strong><span class="card-line-icon card-notes-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 3h14v18H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span> NOTAS</strong>${e.notes}</div>`:''}
   <div class="detail-actions-v35"><button id="detailDelete" class="detail-btn danger" type="button">🗑️ ELIMINAR</button><button id="detailEdit" class="detail-btn" type="button">✏️ EDITAR</button><button id="detailShare" class="detail-btn share" type="button">↗ COMPARTIR</button></div></article>`;
   if($("detailCallV35"))$("detailCallV35").onclick=()=>{const d=phoneDigitsV18(e.phone);if(d)window.location.href='tel:+'+d};
   if($("detailWaV35"))$("detailWaV35").onclick=()=>{const d=phoneDigitsV18(e.phone);if(d)window.location.href='https://wa.me/'+d};
