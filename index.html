@@ -2335,3 +2335,71 @@ body.license-authorized #bottomNav{visibility:visible;}
  if(state.view==='calendar')renderCalendar();
 })();
 </script>
+
+
+<style id="v61-directory-link-fix">
+/* V61 — SOLO: Directorio editable + vínculo de recintos/reemplazos con prestaciones */
+.directory-item-v61{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 11px;border:1px solid #333;border-radius:13px;background:#171717}
+.directory-actions-v61{display:flex;align-items:center;gap:4px}
+.directory-icon-btn-v61{width:34px;height:34px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;padding:6px;color:var(--gold)}
+.directory-icon-btn-v61.delete{color:#ff8585}
+.directory-icon-btn-v61 svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.directory-colleague-actions-v60{display:flex!important;justify-content:flex-end!important;gap:7px!important}
+.directory-colleague-actions-v60 .directory-edit-v60,.directory-colleague-actions-v60 .directory-remove-v60{width:38px!important;height:38px!important;min-height:38px!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:0!important}
+.directory-colleague-actions-v60 .directory-edit-v60 svg,.directory-colleague-actions-v60 .directory-remove-v60 svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.replacement-contact-v61{display:inline-flex;gap:7px;margin-left:9px;vertical-align:middle}
+.replacement-contact-v61 button{width:34px;height:34px;border:1px solid #4a5662;border-radius:10px;background:#17202a;color:#fff;display:inline-flex;align-items:center;justify-content:center;padding:0}
+.replacement-contact-v61 button.wa{color:#24d366}
+.replacement-contact-v61 svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+</style>
+<script id="v61-directory-link-fix-script">
+(function(){
+ const editIcon=()=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
+ const trashIcon=()=>typeof directoryTrashIcon==='function'?directoryTrashIcon():'<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 15H6L5 6"/></svg>';
+ const callIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 2.8 9.2 7c.4.7.3 1.5-.3 2l-1.5 1.2c1.2 2.7 3.3 4.8 6 6l1.2-1.5c.5-.6 1.3-.7 2-.3l4.2 2.6c.7.4 1 1.2.7 1.9-.7 1.7-2.3 2.8-4.1 2.8C9 21.7 2.3 15 2.3 6.6c0-1.8 1.1-3.4 2.8-4.1.6-.3 1.2-.1 1.5.3Z"/></svg>';
+ const waIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.4-4.7A8.5 8.5 0 1 1 20.5 11.7Z"/><path d="M8.3 7.6c.2-.4.5-.4.8-.4h.5c.2 0 .4.1.5.4l.9 2.1c.1.3.1.5-.1.7l-.7.8c-.2.2-.2.4-.1.6.8 1.7 2.1 3 3.8 3.8.2.1.4.1.6-.1l.8-.9c.2-.2.5-.3.7-.1l2 .9c.3.1.4.3.4.6 0 .4-.2 1.2-.7 1.7-.5.5-1.4.8-2.2.8-1.3 0-3.2-.6-5.3-2.4-2.4-2.1-3.7-4.7-3.7-6.4 0-.8.3-1.5.7-2Z"/></svg>';
+ let editArtistIndex=-1,editPlaceIndex=-1,editColleagueIndex=-1;
+ function esc(v){return typeof directoryEsc==='function'?directoryEsc(v):String(v??'')}
+ function findPlace(v){const q=upperText(v);if(!q)return null;return (directory.places||[]).find(x=>x.name===q)||(directory.places||[]).filter(x=>x.name.startsWith(q))[0]||null}
+ function findColleague(v){const q=upperText(v);if(!q)return null;return (directory.colleagues||[]).find(x=>x.name===q)||((directory.colleagues||[]).filter(x=>x.name.startsWith(q)).length===1?(directory.colleagues||[]).filter(x=>x.name.startsWith(q))[0]:null)}
+ function applyPlace(inputId,addressId){const x=findPlace($(inputId)?.value);if(x&&$(addressId)){if(x.name)$(inputId).value=x.name;if(x.address)$(addressId).value=x.address}}
+ function applyReplacement(){const x=findColleague($('replacementPerson')?.value);if(x&&$('replacementPerson'))$('replacementPerson').value=x.name}
+ function resetButtons(){if($('directoryArtistAdd'))$('directoryArtistAdd').textContent='＋ AGREGAR';if($('directoryPlaceAdd'))$('directoryPlaceAdd').textContent='＋ AGREGAR';if($('directoryColleagueAdd'))$('directoryColleagueAdd').textContent='＋ AGREGAR'}
+ window.renderDirectory=function(){
+   const al=$('directoryArtistList'),pl=$('directoryPlaceList'),cl=$('directoryColleagueList'),ao=$('directoryArtistOptions'),po=$('directoryPlaceOptions'),co=$('directoryColleagueOptions');
+   if(ao)ao.innerHTML=(directory.artists||[]).map(x=>`<option value="${esc(x)}"></option>`).join('');
+   if(po)po.innerHTML=(directory.places||[]).map(x=>`<option value="${esc(x.name)}">${esc(x.address||'')}</option>`).join('');
+   if(co)co.innerHTML=(directory.colleagues||[]).map(x=>`<option value="${esc(x.name)}">${esc([x.specialty,x.phone].filter(Boolean).join(' · '))}</option>`).join('');
+   if(al)al.innerHTML=(directory.artists||[]).length?directory.artists.map((x,i)=>`<div class="directory-item-v61"><div><b>${esc(x)}</b></div><div class="directory-actions-v61"><button class="directory-icon-btn-v61" data-dir-artist-edit="${i}" type="button" aria-label="Editar">${editIcon()}</button><button class="directory-icon-btn-v61 delete" data-dir-artist="${i}" type="button" aria-label="Eliminar">${trashIcon()}</button></div></div>`).join(''):'<div class="directory-empty-v56">AÚN NO HAY NOMBRES GUARDADOS</div>';
+   if(pl)pl.innerHTML=(directory.places||[]).length?directory.places.map((x,i)=>`<div class="directory-item-v61"><div><b>${esc(x.name)}</b>${x.address?`<small>${esc(x.address)}</small>`:''}</div><div class="directory-actions-v61"><button class="directory-icon-btn-v61" data-dir-place-edit="${i}" type="button" aria-label="Editar">${editIcon()}</button><button class="directory-icon-btn-v61 delete" data-dir-place="${i}" type="button" aria-label="Eliminar">${trashIcon()}</button></div></div>`).join(''):'<div class="directory-empty-v56">AÚN NO HAY RECINTOS GUARDADOS</div>';
+   if(cl)cl.innerHTML=(directory.colleagues||[]).length?directory.colleagues.map((x,i)=>{const opened=i===openDirectoryColleagueIndex;return `<div class="directory-colleague-card-v60${opened?' open':''}"><button class="directory-colleague-head-v60" data-colleague-toggle="${i}" type="button" aria-expanded="${opened}"><b>${esc(x.name)}</b><span class="directory-chevron-v60">›</span></button><div class="directory-colleague-detail-v60"><div class="directory-detail-row-v60"><small>NOMBRE</small><strong>${esc(x.name)}</strong></div><div class="directory-detail-row-v60"><small>TELÉFONO</small><strong>${esc(x.phone||'—')}</strong></div><div class="directory-detail-row-v60"><small>NOTAS / ESPECIALIDAD</small><strong>${esc(x.specialty||'—')}</strong></div><div class="directory-colleague-actions-v60"><button class="directory-edit-v60" data-dir-colleague-edit="${i}" type="button" aria-label="Editar">${editIcon()}</button><button class="directory-remove-v60" data-dir-colleague-delete="${i}" type="button" aria-label="Eliminar">${trashIcon()}</button></div></div></div>`}).join(''):'<div class="directory-empty-v56">AÚN NO HAY COLEGAS GUARDADOS</div>';
+   document.querySelectorAll('[data-dir-artist]').forEach(b=>b.onclick=()=>{if(confirm(`¿ELIMINAR ${directory.artists[Number(b.dataset.dirArtist)]}?`)){directory.artists.splice(Number(b.dataset.dirArtist),1);saveDirectory()}});
+   document.querySelectorAll('[data-dir-place]').forEach(b=>b.onclick=()=>{const x=directory.places[Number(b.dataset.dirPlace)];if(x&&confirm(`¿ELIMINAR ${x.name}?`)){directory.places.splice(Number(b.dataset.dirPlace),1);saveDirectory()}});
+   document.querySelectorAll('[data-colleague-toggle]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.colleagueToggle);openDirectoryColleagueIndex=openDirectoryColleagueIndex===i?-1:i;renderDirectory()});
+   document.querySelectorAll('[data-dir-artist-edit]').forEach(b=>b.onclick=()=>{editArtistIndex=Number(b.dataset.dirArtistEdit);$('directoryArtistName').value=directory.artists[editArtistIndex]||'';$('directoryArtistAdd').textContent='GUARDAR';$('directoryArtistName').focus()});
+   document.querySelectorAll('[data-dir-place-edit]').forEach(b=>b.onclick=()=>{editPlaceIndex=Number(b.dataset.dirPlaceEdit);const x=directory.places[editPlaceIndex];if(!x)return;$('directoryPlaceName').value=x.name||'';$('directoryPlaceAddress').value=x.address||'';$('directoryPlaceAdd').textContent='GUARDAR';$('directoryPlaceName').focus()});
+   document.querySelectorAll('[data-dir-colleague-edit]').forEach(b=>b.onclick=e=>{e.stopPropagation();editColleagueIndex=Number(b.dataset.dirColleagueEdit);const x=directory.colleagues[editColleagueIndex];if(!x)return;$('directoryColleagueName').value=x.name||'';$('directoryColleaguePhone').value=x.phone||'';$('directoryColleagueSpecialty').value=x.specialty||'';$('directoryColleagueAdd').textContent='GUARDAR';$('directoryColleagueName').focus()});
+   document.querySelectorAll('[data-dir-colleague-delete]').forEach(b=>b.onclick=e=>{e.stopPropagation();const i=Number(b.dataset.dirColleagueDelete),x=directory.colleagues[i];if(x&&confirm(`¿ELIMINAR A ${x.name}?`)){directory.colleagues.splice(i,1);openDirectoryColleagueIndex=-1;saveDirectory()}});
+ };
+ function saveArtist(){const v=upperText($('directoryArtistName')?.value);if(!v)return;if(editArtistIndex>=0){directory.artists[editArtistIndex]=v;editArtistIndex=-1}else if(!directory.artists.includes(v))directory.artists.push(v);$('directoryArtistName').value='';resetButtons();saveDirectory()}
+ function savePlace(){const name=upperText($('directoryPlaceName')?.value),address=upperText($('directoryPlaceAddress')?.value);if(!name)return;if(editPlaceIndex>=0){directory.places[editPlaceIndex]={name,address};editPlaceIndex=-1}else{const i=directory.places.findIndex(x=>x.name===name);if(i>=0)directory.places[i]={name,address};else directory.places.push({name,address})}$('directoryPlaceName').value='';$('directoryPlaceAddress').value='';resetButtons();saveDirectory()}
+ function saveColleague(){const name=upperText($('directoryColleagueName')?.value),phone=cleanText($('directoryColleaguePhone')?.value),specialty=upperText($('directoryColleagueSpecialty')?.value);if(!name)return;if(editColleagueIndex>=0){directory.colleagues[editColleagueIndex]={name,phone,specialty};editColleagueIndex=-1}else{const i=directory.colleagues.findIndex(x=>x.name===name);if(i>=0)directory.colleagues[i]={name,phone,specialty};else directory.colleagues.push({name,phone,specialty})}$('directoryColleagueName').value='';$('directoryColleaguePhone').value='';$('directoryColleagueSpecialty').value='';resetButtons();saveDirectory()}
+ if($('directoryArtistAdd'))$('directoryArtistAdd').onclick=saveArtist;
+ if($('directoryPlaceAdd'))$('directoryPlaceAdd').onclick=savePlace;
+ if($('directoryColleagueAdd'))$('directoryColleagueAdd').onclick=saveColleague;
+ if($('directoryArtistName'))$('directoryArtistName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveArtist()}};
+ if($('directoryPlaceAddress'))$('directoryPlaceAddress').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();savePlace()}};
+ if($('directoryColleagueSpecialty'))$('directoryColleagueSpecialty').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveColleague()}};
+ if($('meeting'))$('meeting').setAttribute('list','directoryPlaceOptions');
+ ['change','blur'].forEach(evt=>{if($('place'))$('place').addEventListener(evt,()=>applyPlace('place','placeAddress'));if($('meeting'))$('meeting').addEventListener(evt,()=>applyPlace('meeting','meetingAddress'));if($('replacementPerson'))$('replacementPerson').addEventListener(evt,applyReplacement)});
+ const previousSave=window.saveForm;
+ if(typeof previousSave==='function')window.saveForm=function(ev){applyPlace('place','placeAddress');applyPlace('meeting','meetingAddress');applyReplacement();return previousSave.apply(this,arguments)};
+ const form=$('eventForm'),save=$('saveFormBtn');if(form)form.onsubmit=ev=>window.saveForm(ev);if(save)save.onclick=ev=>window.saveForm(ev);
+ function addReplacementActions(root,eventObj){if(!root||!eventObj||eventObj.status!=='Va Remplazo'||!eventObj.replacementPerson)return;const colleague=findColleague(eventObj.replacementPerson);if(!colleague||!colleague.phone)return;const phone=typeof phoneDigitsV18==='function'?phoneDigitsV18(colleague.phone):String(colleague.phone).replace(/\D/g,'');if(!phone)return;const candidates=[...root.querySelectorAll('.next-extra-row,.compact-line,.detail-notes-v35')];const row=candidates.find(el=>(el.textContent||'').toLocaleUpperCase('es-CL').includes('REEMPLAZA'));if(!row||row.querySelector('.replacement-contact-v61'))return;const box=document.createElement('span');box.className='replacement-contact-v61';box.innerHTML=`<button type="button" class="replacement-call-v61" aria-label="Llamar a reemplazo">${callIcon}</button><button type="button" class="replacement-wa-v61 wa" aria-label="WhatsApp a reemplazo">${waIcon}</button>`;row.appendChild(box);box.querySelector('.replacement-call-v61').onclick=e=>{e.stopPropagation();window.location.href='tel:+'+phone};box.querySelector('.replacement-wa-v61').onclick=e=>{e.stopPropagation();window.location.href='https://wa.me/'+phone}}
+ const oldHero=window.renderNextHero;if(typeof oldHero==='function')window.renderNextHero=function(){const r=oldHero.apply(this,arguments);const n=sortEvents((state.events||[]).filter(e=>e.date>=todayString()))[0];addReplacementActions($('nextHeroCard'),n);return r};
+ const oldCard=window.makeCompactCard;if(typeof oldCard==='function')window.makeCompactCard=function(e){const c=oldCard.apply(this,arguments);addReplacementActions(c,e);return c};
+ const oldDetail=window.renderDetail;if(typeof oldDetail==='function')window.renderDetail=function(){const r=oldDetail.apply(this,arguments);const e=state.events.find(x=>String(x.id)===String(state.detailId));addReplacementActions($('detailContent'),e);return r};
+ renderDirectory();
+ if(state.view==='home')renderAll();
+})();
+</script>
