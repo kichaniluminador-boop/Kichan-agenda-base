@@ -934,6 +934,7 @@ function formatMoney(v){return "$"+new Intl.NumberFormat("es-CL",{maximumFractio
 function formatAmountInput(v){const n=numericAmount(v);return n?new Intl.NumberFormat("es-CL",{maximumFractionDigits:0}).format(n):""}
 function parseLocalDate(s){const p=normalizeDate(s).split("-");return p.length===3?new Date(+p[0],+p[1]-1,+p[2],12):null}
 function formatDateWithWeekday(s){const d=parseLocalDate(s);if(!d)return"";let w=new Intl.DateTimeFormat("es-CL",{weekday:"long"}).format(d);w=w[0].toUpperCase()+w.slice(1);return `${w} ${String(d.getDate()).padStart(2,"0")}-${String(d.getMonth()+1).padStart(2,"0")}-${d.getFullYear()}`}
+function formatSearchCardDate(s){const d=parseLocalDate(s);if(!d)return"";let w=new Intl.DateTimeFormat("es-CL",{weekday:"long"}).format(d);w=w[0].toUpperCase()+w.slice(1);const months=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];return `${w} ${String(d.getDate()).padStart(2,"0")}-${months[d.getMonth()]}-${d.getFullYear()}`}
 function normalizeEvent(r){if(!r||typeof r!=="object")return null;const date=normalizeDate(r.date??r.fecha),artist=cleanText(r.artist??r.artista??r.band??r.banda??r.nombre);if(!date||!artist)return null;return{id:cleanText(r.id)||makeId(),date,artist:upperText(artist),place:upperText(r.place??r.location??r.localidad??r.lugar),placeAddress:upperText(r.placeAddress??r.locationAddress??r.direccionLocalidad??r.direccionLugar),meeting:upperText(r.meeting??r.meetingPoint??r.puntoEncuentro??r.encuentro),meetingAddress:upperText(r.meetingAddress??r.meetingPointAddress??r.direccionEncuentro),departure:cleanText(r.departure??r.salida??r.horaSalida??r.arrival),test:cleanText(r.test??r.soundcheck??r.prueba??r.horaPrueba),testEnd:cleanText(r.testEnd??r.soundcheckEnd??r.pruebaFin??r.horaPruebaFin),show:cleanText(r.show??r.showtime??r.horaShow),contact:upperText(r.contact??r.contacto??r.contactName),phone:cleanText(r.phone??r.telefono??r.tel),status:(cleanText(r.status??r.estado)==="Por confirmar"?"Pendiente":cleanText(r.status??r.estado))||"Confirmado",payment:cleanText(r.payment??r.pago)||"Pendiente",amount:numericAmount(r.amount??r.monto),extra:numericAmount(r.extra??r.extras??r.montoExtra),replacementPerson:upperText(r.replacementPerson??r.reemplaza??r.reemplazante),notes:upperText(r.notes??r.notas),priority:Number.isFinite(Number(r.priority??r.prioridad))?Number(r.priority??r.prioridad):999}}
 function sortEvents(a){const pr=v=>Number.isFinite(Number(v))?Number(v):999;return a.slice().sort((x,y)=>x.date.localeCompare(y.date)||(pr(x.priority)-pr(y.priority))||(x.show||x.departure||"99:99").localeCompare(y.show||y.departure||"99:99"))}
 function loadEvents(){try{const r=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");return Array.isArray(r)?sortEvents(r.map(normalizeEvent).filter(Boolean)):[]}catch{return[]}}
@@ -1203,7 +1204,7 @@ function renderHome(){
    title.textContent=`${shown.length} ${shown.length===1?"RESULTADO":"RESULTADOS"} DE BÚSQUEDA`;
  }
  if(!shown.length)c.innerHTML='<div class="empty">No se encontraron prestaciones.</div>';
- else shown.forEach(e=>c.appendChild(makeCompactCard(e)));
+ else shown.forEach(e=>{const card=makeCompactCard(e);const dateEl=card.querySelector(".compact-date");if(dateEl)dateEl.textContent=formatSearchCardDate(e.date);c.appendChild(card)});
 }
 
 function renderCalendar(){
